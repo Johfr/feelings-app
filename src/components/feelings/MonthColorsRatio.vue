@@ -19,21 +19,30 @@ const props = defineProps<{
   year: string,
 }>()
 
-const data = computed((): Todo[] => store.todoItems.filter(item => item.month === monthNumber(props.month) && item.year === parseInt(props.year)))
+const data = computed((): Todo[] => store.todoItems.filter((item: Todo) => item.month === monthNumber(props.month) && item.year === parseInt(props.year)))
 
 const { colorStats, totalPoints, totalColors } = useColorsStats(colorsData, data)
-const monthTendency = computed(() => totalPoints.value >= (totalColors.value / 2))
+
+const monthTendency = computed(() => {
+  let difficulty = (totalColors.value * 0.05) // 5% : mois neutre
+  
+  if (totalPoints.value >= (totalColors.value / 2)) {
+    return 'mois positif'
+  } else if ((totalPoints.value >= (totalColors.value / 2) - difficulty && totalPoints.value <= (totalColors.value / 2) + difficulty )) {
+    return 'mois neutre'
+  } else {
+    return 'mois négatif'
+  }
+})
+
 const showTendence = ref<boolean>(false)
 const tendenceButtonText = ref<string>('Tendance du mois')
 
 const toggleTendence = (): boolean => showTendence.value = !showTendence.value
+const toggleTendenceText = (): string => showTendence.value ? tendenceButtonText.value = 'Masquer' : tendenceButtonText.value = 'Tendance du mois'
 const showTendenceFn = (): void => {
   toggleTendence()
-  if (showTendence.value) {
-    tendenceButtonText.value = 'Masquer'
-  } else {
-    tendenceButtonText.value = 'Tendance du mois'
-  }
+  toggleTendenceText()
 }
 </script>
 
@@ -48,7 +57,7 @@ const showTendenceFn = (): void => {
   <Transition name="fade">
     <div v-if="showTendence">
       <p class="border-l-5 border-l-solid border-l p-2 inline-block mt-1" :class="monthTendency ? 'text-green-500 ' : 'text-red-500 '">
-        {{ monthTendency ? 'Mois positif' : 'Mois négatif' }} ({{ totalPoints }}/{{ totalColors }})
+        {{ monthTendency }} ({{ totalPoints }}/{{ totalColors }})
       </p>
       <GraphBar v-if="colorStats.length" :colorStats="colorStats" />
     </div>

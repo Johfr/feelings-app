@@ -21,14 +21,14 @@ onMounted(() => {
 })
 
 // Met à jour la goal quand le mois/année change ou après chargement
-const updateGoal = async () => {  
+const updateGoal = async () => {
   const goalFound = await goalStore.findOne(props.routeMonthNumber, Number(props.routeYear))
   monthGoal.value = goalFound || null
 }
 
 // Si le mois/année change dynamiquement
 watch(
-  () => [props.routeMonthNumber, props.routeYear, goalStore.goalItems],
+  () => [props.routeMonthNumber, props.routeYear, goalStore.items],
   updateGoal,
   { immediate: true }
 )
@@ -56,6 +56,15 @@ const createNewGoal = async (newGoalTitle: string) => {
   }
 }
 
+const deleteGoal = async (itemId: string, goalTitle: string) => {
+  const resp = await goalStore.delete(itemId)
+  
+  if (resp.status === 200) {
+    updateGoal()
+    showPopinFn()
+  }
+}
+
 </script>
 
 <template>
@@ -74,10 +83,17 @@ const createNewGoal = async (newGoalTitle: string) => {
       <Transition name="slide-fade">
         <Popin v-if="showPopin" v-model="showPopin">
           <div class="popin-content">
-            <MonthGoalForm :id="monthGoal?.id" :goal="monthGoal?.goal" v-model="showPopin" @update="updateGoalTitle" @create="createNewGoal" />
+            <MonthGoalForm :id="monthGoal?.id" :goal="monthGoal?.goal" v-model="showPopin" @update="updateGoalTitle" @create="createNewGoal" @delete="deleteGoal" />
           </div>
         </Popin>
       </Transition>
     </Teleport>
   </div>
 </template>
+
+<style scoped>
+/* .popin-content {
+ display: flex;
+ align-items: flex-start;
+} */
+</style>

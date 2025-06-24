@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import Navbar from '@/components/rgaa/navbar.vue'
 
 const setHour = () => {
@@ -16,18 +16,18 @@ const setHour = () => {
 
 onMounted(() => setHour())
 
-setInterval(() => {
-  const hour = setHour()
-  console.log('maj à : ' + hour + 'h')
+// setInterval(() => {
+//   const hour = setHour()
+//   console.log('maj à : ' + hour + 'h')
   
-}, 3600000)
+// }, 3600000)
 
 // TODO 
 // Faire de l'app la page principale
 </script>
 
 <template>
-  <Navbar />
+  <!-- <Navbar /> -->
   <RouterView />
 </template>
 
@@ -41,13 +41,6 @@ header {
   display: block;
   margin: 0 auto 2rem;
 }
-
-/* nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-} */
 
 nav a.router-link-exact-active {
   color: var(--color-text);

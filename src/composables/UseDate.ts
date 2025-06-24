@@ -22,7 +22,13 @@ export const previousNextMonth = (monthName: string, direction: string): string 
 
   return months[actualMonth]
 }
+
 export const daysInMonth = (month: number, year: number): number => {
   return new Date(year, month + 1, 0).getDate()
 }
+
 export const monthNumber = (monthName: string) => months.indexOf(monthName)
+
+export const currentDay = date.getDate()
+
+export const currentMonth = date.getMonth()

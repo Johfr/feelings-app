@@ -50,7 +50,6 @@ const closePopin = ():void => {
   overflow-y: scroll;
   border: 1px solid #f1f1f1;
   background-color: #fff;
-  border-radius: 32px;
   overflow: hidden;
 
   @media (min-width: 960px) {

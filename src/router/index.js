@@ -2,9 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@views/HomeView.vue'
 
 import Apps from '@views/apps.vue'
-import Years from '@/components/Years.vue'
-import Months from '@/components/Months.vue'
-import wellBeingApp from '@/components/wellBeingApp.vue'
+import Years from '@/components/feelings/Years.vue'
+import Months from '@/components/feelings/Months.vue'
+import wellBeingApp from '@/components/feelings/wellBeingApp.vue'
 
 // import Article from '@views/Article.vue'
 import NotFound from '@views/NotFound.vue'

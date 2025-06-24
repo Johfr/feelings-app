@@ -38,11 +38,24 @@ export const useGoalStore = defineStore('goal', () => {
       year: routeYear
     }
 
-    const resp = await update(newGoal, 'POST')    
+    const resp = await update(newGoal, 'POST')
 
     // maj faite, on met à jour localement
     if (resp.status === 201) {
       items.value.push(newGoal)    
+    }
+
+    return resp
+  }
+  
+  const deleteGoal = async (itemId: string): Promise<{status: number, message: string}> => {
+    const index = items.value.findIndex((item): Boolean => item.id === itemId)
+
+    const resp = await update(items.value[index], 'DELETE')
+
+    // maj faite, on met à jour localement
+    if (resp.status === 200) {
+      items.value.splice(index, 1) 
     }
 
     return resp
@@ -55,5 +68,6 @@ export const useGoalStore = defineStore('goal', () => {
     findOne,
     create: createGoal,
     update: updateGoal,
+    delete: deleteGoal,
   }
 })

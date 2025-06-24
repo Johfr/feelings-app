@@ -24,6 +24,10 @@ const totalMonthDays = computed(() => daysInMonth(monthNumber(props.month), pars
   display: flex;
   flex-wrap: wrap;
   gap: var(--gap-10);
+  margin-top: 50px;
+  // @media (min-width: 960px) {
+  //   margin-top: 0;
+  // }
 }
 .day-item {
   display: flex;

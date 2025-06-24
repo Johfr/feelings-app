@@ -1,6 +1,6 @@
 // composables/useFetchApi.ts
 import { ref } from 'vue'
-type WithId = { id?: string }
+type WithId = { id?: string } // id étant optionnel dans certain type, on le défini en extends
 
 
 export const useFetch = <T extends WithId>(apiRoute: string) => {
@@ -12,7 +12,12 @@ export const useFetch = <T extends WithId>(apiRoute: string) => {
     loading.value = true
     try {
       const res = await fetch(`/api/${apiRoute}`)
+      // let res 
+      // if (apiRoute === 'todos') res = await fetch(`/api/${apiRoute}`)
+      // else res = await fetch(`/api/${apiRoute}`)
+      
       if (!res.ok) throw new Error('Erreur serveur')
+
       const data = await res.json()
       items.value = data
     } catch (err: any) {
@@ -26,6 +31,7 @@ export const useFetch = <T extends WithId>(apiRoute: string) => {
     loading.value = true
     try {
       let fetchUri = `/api/${apiRoute}/` + (item.id ?? '')
+      
 
       if (method === 'POST') fetchUri = `/api/${apiRoute}/`
       

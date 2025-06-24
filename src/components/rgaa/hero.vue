@@ -73,20 +73,4 @@ p {
     margin-bottom: 75px;
   }
 }
-
-// button {
-//   width: 100%;
-//   max-width: 50%;
-//   font-size: 14px;
-//   padding: 15px 10px;
-//   color: #717171;
-//   border-radius: 10px;
-//   box-shadow: 0px 10px 10px #f3f3f3;
-//   transition: 1s ease;
-//   cursor: pointer;
-
-//   &:hover {
-//     box-shadow: unset;
-//   }
-// }
 </style>

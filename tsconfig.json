@@ -3,9 +3,17 @@
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "node",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": ["src/*"],
+      "@types/*": ["src/types/*"],
+      "@components/*": ["src/components/*"],
+      "@views/*": ["src/views/*"],
+      "@stores/*": ["src/stores/*"],
+      "@router/*": ["src/router/*"],
+      "@composables/*": ["src/composables/*"],
+      "@designSystem/*": ["src/design-system/*"]
+    },
   },
   "exclude": ["node_modules", "dist"]
 }

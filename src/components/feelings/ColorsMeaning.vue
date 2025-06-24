@@ -1,10 +1,9 @@
 <script setup lang="ts">
-// import { colorsMeaning } from '@/composables/useColorsMeaning'
 import Pencil from '@/assets/svg/pencil.svg?component'
 import Popin from '@/components/utils/Popin.vue'
+import ColorsForm from '@/components/utils/ColorsForm.vue'
 import { useColorStore } from '@/stores/colorStore'
 import { Colors } from '@/types/Colors'
-import ColorsForm from '@/components/utils/ColorsForm.vue'
 
 const store = useColorStore()
 store.loadColors()
@@ -12,14 +11,13 @@ store.loadColors()
 const showPopin = ref<boolean>(false)
 
 const colorsData = computed((): Colors[] => store.colorItems)
+const colorSelected = ref<Colors[]>()
+const formType = ref<string>('')
 
 const showPopinFn = ():void => {
   showPopin.value = !showPopin.value
 }
 
-
-const colorSelected = ref<Colors[]>()
-const formType = ref<string>('')
 
 const showFormFn = (type: string, data: Colors = null): void => {
   showPopinFn()

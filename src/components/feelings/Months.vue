@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { months, monthNumber } from '@/composables/UseDate'
 import BackButton from '@/components/utils/BackButton.vue'
-import MonthsTotalDays from '@/components/MonthsTotalDays.vue'
+import MonthsTotalDays from '@/components/feelings/MonthsTotalDays.vue'
 
 const route = useRoute()
 const year = computed(() => route.params.year as string)

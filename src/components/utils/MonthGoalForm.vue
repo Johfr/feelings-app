@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import ConfirmBox from '@/components/utils/ConfirmBox.vue'
 
 const props = defineProps<{
   id: string | undefined,
   goal:string | undefined
 }>()
 
-const emit = defineEmits(['create', 'update'])
+const emit = defineEmits(['create', 'update', 'delete'])
 
 const showForm = defineModel()
 const showFormFn = () => {
@@ -21,16 +22,32 @@ const formSubmit = async () => {
     emit('update', props.id, localGoal.value)
   }
 }
+
+const showConfirm = ref(false)
+
+const showConfirmFn = () => {
+  showConfirm.value = !showConfirm.value
+}
+
+const deleteGoal = () => {
+  emit('delete', props.id, localGoal.value)
+}
 </script>
 
 <template>
   <form >
     <section>
-      <h3 class="title-h3">
-        Mettre à jour l'objectif
-      </h3>
+      <div class="flex items-center justify-between">
+        <h3 class="title-h3">
+          Mettre à jour l'objectif
+        </h3>
+
+        <button v-if="props.id" type="button" class="delete-button" title="supprimer l'objectif" @click="showConfirmFn">
+          Supprimer
+        </button>
+      </div>
       
-      <div class="flex flex-col">
+      <div class="flex flex-col mt-3">
         <label for="title">
           Titre :
         </label>
@@ -38,6 +55,10 @@ const formSubmit = async () => {
           {{ localGoal }}
         </textarea>
       </div>
+
+      <Transition name="slide-fade">
+        <ConfirmBox v-if="showConfirm" v-model="showConfirm" @confirm="deleteGoal" />
+      </Transition>
 
       <div class="button-container">
         <button type="submit" class="submit" @click.prevent="formSubmit">Sauvegarder</button>
@@ -55,6 +76,7 @@ const formSubmit = async () => {
 form {
   display: flex;
   flex-direction: column;
+  width: 100%;
   padding: 16px;
   background-color: #fff;
 }
