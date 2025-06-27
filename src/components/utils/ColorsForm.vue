@@ -11,9 +11,6 @@ const props = defineProps<{
   formType: string
 }>()
 
-console.log('fff', props);
-
-
 const emit = defineEmits(['create'])
 
 const showForm = defineModel()

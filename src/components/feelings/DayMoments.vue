@@ -6,7 +6,7 @@ import { Todo } from '@/types/Todo'
 const props = defineProps<{
   dayNumber: number,
   month: string,
-  year: string,
+  year: number,
 }>()
 
 const store = useTodoStore()
@@ -14,7 +14,7 @@ store.loadTodos()
 
 const data = computed((): Todo[] => {
   const itemsFound = store.todoItems.filter(item => {
-    if (item.month === monthNumber(props.month) && item.year === parseInt(props.year) && item.day === props.dayNumber) {
+    if (item.month === monthNumber(props.month) && item.year === props.year && item.day === props.dayNumber) {
       return item
     }
   })
@@ -48,11 +48,11 @@ const data = computed((): Todo[] => {
   bottom: 0;
 }
 .item_color-block {
-  width: 33px;
-  height: 5px;
+  width: 100%;
+  height: 1px;
 
   @media (min-width: 960px) {
-    height: 5px;
+    height: 2px;
   }
 }
 </style>

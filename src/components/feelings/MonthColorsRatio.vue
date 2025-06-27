@@ -16,10 +16,10 @@ const store = useTodoStore()
 
 const props = defineProps<{
   month: string,
-  year: string,
+  year: number,
 }>()
 
-const data = computed((): Todo[] => store.todoItems.filter((item: Todo) => item.month === monthNumber(props.month) && item.year === parseInt(props.year)))
+const data = computed((): Todo[] => store.todoItems.filter((item: Todo) => item.month === monthNumber(props.month) && item.year === props.year))
 
 const { colorStats, totalPoints, totalColors } = useColorsStats(colorsData, data)
 

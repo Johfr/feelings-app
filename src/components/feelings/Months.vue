@@ -5,6 +5,7 @@ import MonthsTotalDays from '@/components/feelings/MonthsTotalDays.vue'
 
 const route = useRoute()
 const year = computed(() => route.params.year as string)
+const routeYearNumber = Number(year.value)
 
 </script>
 
@@ -19,7 +20,7 @@ const year = computed(() => route.params.year as string)
           {{ month }}
         </span>
 
-        <MonthsTotalDays class="months-total-days" :month="month" :yearNumber="year">
+        <MonthsTotalDays class="months-total-days" :month="monthNumber(month)" :yearNumber="routeYearNumber">
           <template v-slot:item="slotProps">
             <p class="day_number">
               {{ slotProps.dayNumber }}

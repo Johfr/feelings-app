@@ -2,11 +2,11 @@
 import { daysInMonth, monthNumber, previousNextMonth } from '@/composables/UseDate'
 
 const props = defineProps<{
-  month: string,
-  yearNumber: string,
+  month: number,
+  yearNumber: number,
 }>()
 
-const totalMonthDays = computed(() => daysInMonth(monthNumber(props.month), parseInt(props.yearNumber)) )
+const totalMonthDays = computed(() => daysInMonth(props.month, props.yearNumber) )
 </script>
 
 <template>
@@ -38,12 +38,12 @@ const totalMonthDays = computed(() => daysInMonth(monthNumber(props.month), pars
   height: 30px;
   cursor: pointer;
   position: relative;
-  background-color: #fff;
+  // background-color: #fff;
 
   @media (min-width: 960px) {
-    width: 100px;
-    height: 100px;
-    border: 1px solid #f1f1f1;
+    width: 13%;
+    height: 80px;
+    // border: 1px solid #f1f1f1;
   }
 
   // &_day {

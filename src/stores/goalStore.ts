@@ -28,11 +28,8 @@ export const useGoalStore = defineStore('goal', () => {
   }
 
   const createGoal = async (newGoalTitle: string, routeMonthNumber : number, routeYear : number): Promise<{status: number, message: string}> => {
-    // on crée l'id à partir du dernier id connu
-    const newId = Number(items.value.at(-1).id) + 1
-
     const newGoal = {
-      id: newId.toString(),
+      id: crypto.randomUUID(),
       goal: newGoalTitle,
       month: routeMonthNumber,
       year: routeYear

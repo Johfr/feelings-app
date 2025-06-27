@@ -3,7 +3,7 @@ import {  previousNextMonth } from '@/composables/UseDate'
 
 const props = defineProps<{
   routeMonth: string,
-  routeYear: string
+  routeYear: number
 }>()
 
 const router = useRouter()
@@ -20,6 +20,8 @@ const GetPreviousNextMonth = (direction: string) => {
     <span class="previous-button" @click="GetPreviousNextMonth('previous')"><</span>
     <h1 class="title-h1">{{ routeMonth }} {{ routeYear }}</h1>
     <span class="next-button" @click="GetPreviousNextMonth('next')">></span>
+
+    <slot></slot>
   </div>
 </template>
 

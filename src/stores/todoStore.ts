@@ -29,12 +29,8 @@ export const useTodoStore = defineStore('todo', () => {
   }
 
   const createTodo = async (day: Day, momentUpdated: DayMoments): Promise<{status: number, message: string}> => {
-    // json server accept only string as key
-    const lastTodosId = todoItems.value.at(-1).id as string
-    const newId = (parseInt(lastTodosId) + 1)
-    
     const newItem = {
-      id: newId.toString(),
+      id: crypto.randomUUID(),
       day: day.dayNumber,
       month: day.monthNumber,
       year: Number(day.year),

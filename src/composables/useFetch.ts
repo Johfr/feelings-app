@@ -3,18 +3,16 @@ import { ref } from 'vue'
 type WithId = { id?: string } // id étant optionnel dans certain type, on le défini en extends
 
 
-export const useFetch = <T extends WithId>(apiRoute: string) => {
+export const useFetch = <T extends WithId>(apiRoute: string, year: number = null, month: number = null, day: number = null) => {
   const items = ref<T[]>([])
   const loading = ref(false)
   const error = ref<Error | null>(null)
 
   const fetchApi = async () => {
     loading.value = true
-    try {
+    try {      
+      // const res = await fetch(`/api/${apiRoute}` + (year ? '?year=' + year : '') + (month ? '?month=' + month : '') + (day ? '?day=' + day : ''))
       const res = await fetch(`/api/${apiRoute}`)
-      // let res 
-      // if (apiRoute === 'todos') res = await fetch(`/api/${apiRoute}`)
-      // else res = await fetch(`/api/${apiRoute}`)
       
       if (!res.ok) throw new Error('Erreur serveur')
 

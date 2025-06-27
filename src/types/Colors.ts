@@ -1,6 +1,6 @@
 // colors interface
 export interface Colors {
-    id?: string,
+    id: string,
     color: string,
     meaning: string,
     type: string,

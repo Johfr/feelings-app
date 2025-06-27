@@ -10,7 +10,7 @@ const closePopin = ():void => {
   <div class="popin-container">
     <div v-if="showPopin" class="popin-overlay" @click="closePopin" />
     <div v-if="showPopin" class="popin">
-      <div class="popin-button" @click="closePopin">X</div>
+      <div class="close-button" @click="closePopin">X</div>
       <slot />
     </div>
   </div>
@@ -28,6 +28,7 @@ const closePopin = ():void => {
   left: -20px;
   right: -20px;
   bottom: 0;
+  z-index: 3;
   
   @media (min-width: 960px) {
     top: 50%;
@@ -56,22 +57,6 @@ const closePopin = ():void => {
     width: 450px;
     height: calc(100vh - 400px);
   }
-}
-
-.popin-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 25px;
-  min-height: 25px;
-  font-weight: 700;
-  border: 1px solid;
-  border-radius: 50%;
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  cursor: pointer;
-  z-index: 2;
 }
 
 </style>

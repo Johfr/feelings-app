@@ -73,7 +73,7 @@ const deleteGoal = async (itemId: string, goalTitle: string) => {
       Objectif du mois :
     </h1>
 
-    <p class="underline mr-3">
+    <p class="mr-3">
       {{ monthGoal?.goal }}
     </p>
 
