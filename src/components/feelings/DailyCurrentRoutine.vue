@@ -41,6 +41,7 @@ const crudRoutine = (routine: CurrentRoutine, type: string = ''): void => {
 
 const toggleDone = (routine: CurrentRoutine) => {
   routine.done = !routine.done
+  updateRoutine(routine)
 }
 
 const emit = defineEmits(['create', 'update', 'confirm'])
@@ -50,7 +51,6 @@ const createNewRoutine = async (newRoutine: string) => {
 }
 
 const updateRoutine = async (routine: CurrentRoutine) => {
-  toggleDone(routine)
   emit('update', routine)
 }
 
@@ -72,9 +72,10 @@ const deleteRoutine = async () => {
       Ajouter une tâche
     </button>
 
-    <label :for="routine.id" v-for="(routine, routineId) in sortedRoutines" :key="routine.id" class="flex flex-wrap items-center">
-      <input v-if="asCheckBox" :id="routine.id" type="checkbox" class="w-4 h-4 mr-3" v-model="routine.done" @input="updateRoutine(routine)">
-      <p :class="{'done': routine.done}">
+    <label :for="routine.id" v-for="(routine) in sortedRoutines" :key="routine.id" class="flex flex-wrap items-center">
+      <!-- <input v-if="asCheckBox" :id="routine.id" type="checkbox" class="w-4 h-4 mr-3" v-model="routine.done" @input="toggleDone(routine)"> -->
+      <div v-if="asCheckBox" class="rounded-[50%] w-2 h-2 mr-3 border-1 border-solid border-blue-500" :class="{'bg-blue-500': routine.done}"></div>
+      <p :class="{'done': routine.done}" @click="toggleDone(routine)">
         {{ routine.title }}
       </p>
       <button type="button" class="" @click="crudRoutine(routine)">Modifier</button>

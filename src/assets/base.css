@@ -96,7 +96,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 } */
 
+p {
+  font-size: 12px;
 
+  @media (min-width: 1024px) {
+    font-size: 16px;  
+  }
+}
 
 /*
   Les animations d'entrée et de sortie peuvent utiliser différentes

@@ -6,7 +6,7 @@ import Sun from '@/assets/svg/sun.svg?component'
 import Drawner from '@/components/utils/Drawer.vue'
 import DailyCurrentRoutine from '@/components/feelings/DailyCurrentRoutine.vue'
 import Form from '@/components/utils/Form.vue'
-import { months, monthNumber, currentDay, currentMonth } from '@/composables/UseDate'
+import { days, dayNumber, months, monthNumber, currentDay, currentMonth } from '@/composables/UseDate'
 import { useColorStore } from '@/stores/colorStore'
 import { useTodoStore } from '@/stores/todoStore'
 import { useCurrentRoutineStore } from '@/stores/currentRoutineStore'
@@ -16,6 +16,7 @@ import { Day } from '@/types/Day'
 import { Todo } from '@/types/Todo'
 import { CurrentRoutine } from '@/types/CurrentRoutine'
 import { RecurrentRoutine } from '@/types/RecurrentRoutine'
+import DayDate from './DayDate.vue'
 
 const currentRoutinesStore = useCurrentRoutineStore()
 currentRoutinesStore.loadRoutines()
@@ -72,16 +73,16 @@ const props = defineProps<{
 
 const day = ref<Todo>()
 
-useTodoStore().findOne(props.daySelected).then((todoFind: Todo) => {
+const findTodo = async (daySelected: Day) => await useTodoStore().findOne(daySelected).then((todoFind: Todo) => {
   if (todoFind) {
     day.value = todoFind
   }
   else {
     day.value =  {
-      id: props.daySelected.id,
-      day: props.daySelected.dayNumber,
-      month: props.daySelected.monthNumber,
-      year: props.daySelected.year,
+      id: daySelected.id,
+      day: daySelected.dayNumber,
+      month: daySelected.monthNumber,
+      year: daySelected.year,
       moments: [
         {
           moment: "morning",
@@ -103,6 +104,8 @@ useTodoStore().findOne(props.daySelected).then((todoFind: Todo) => {
   }
 })
 
+onMounted(() => findTodo(props.daySelected))
+
 const currentRoutines = computed((): CurrentRoutine[] => currentRoutinesStore.items.filter(item => item.day === day.value.day && item.month === day.value.month && item.year === day.value.year ))
 const recurrentRoutines = computed((): RecurrentRoutine[] => recurrentRoutinesStore.items)
 
@@ -110,13 +113,22 @@ const store = useColorStore()
 store.loadColors()
 const colorsData = computed((): Colors[] => store.colorItems)
 
+const dateSelected = ref<Day>(props.daySelected)
+
+const updateDate = async (dateUpdated: { date: number, month: number, year: number }) => {
+  dateSelected.value = {
+    id: null,
+    dayNumber: dateUpdated.date,
+    monthNumber: dateUpdated.month,
+    year: dateUpdated.year
+  }
+
+  await findTodo({ id: null, dayNumber: dateUpdated.date, monthNumber: day.value.month, year: day.value.year })  
+}
+
 // mets à jour le contenu de la popin après un create
-const updateData = () => {  
-  useTodoStore().findOne(props.daySelected).then((todoFind: Todo) => {
-    if (todoFind) {
-      day.value = todoFind
-    }
-  })
+const updateData = () => {
+  findTodo(dateSelected.value)
 }
 
 const formSection = ref<string>('')
@@ -150,9 +162,6 @@ const createNewRoutine = async (routine: CurrentRoutine) => {
 const updateRoutine = async (routine: CurrentRoutine) => {
   const resp = await currentRoutinesStore.update(routine.id, routine.title, routine.done)
 
-  console.log(routine);
-  
-
   // if (resp.status === 200) {
   //   toaster('ok')
   // }
@@ -177,9 +186,11 @@ const pourRecurrentRoutines = async () => {
   <section class="content-section" v-if="day">
     <!-- Titre -->
     <div class="flex items-center justify-between">
-      <h1 class="title-h2">
+      <!-- <h1 class="title-h2">
         {{ day.day }} {{ months[day.month]}} {{ day.year }}
-      </h1>
+        <span>></span>
+      </h1> -->
+      <DayDate :day="day" @update="updateDate"/>
 
       <button @click="showDrawerFn" class="">
         Mes Todos
@@ -225,7 +236,7 @@ const pourRecurrentRoutines = async () => {
     <!-- Drawer daily routine jour -->
     <Teleport to="#app">
       <Drawner v-model="showDrawer">
-        <DailyCurrentRoutine :title="`Tâches du ${currentDay} ${day.day} ${months[day.month]} ${day.year}`" :routines="currentRoutines" :asCheckBox="true" @create="createNewRoutine" @update="updateRoutine" @confirm="deleteRoutine">
+        <DailyCurrentRoutine :title="`Tâches du ${dayNumber(day.day, day.month, Number(day.year))} ${day.day} ${months[day.month]} ${day.year}`" :routines="currentRoutines" :asCheckBox="true" @create="createNewRoutine" @update="updateRoutine" @confirm="deleteRoutine">
           <template #cta>
             <button @click="pourRecurrentRoutines">Importer les routines récurrentes</button>
           </template>

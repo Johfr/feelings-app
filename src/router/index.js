@@ -33,6 +33,11 @@ const router = createRouter({
           name: 'month',
           component: wellBeingApp,
         },
+        {
+          path: ':year/:month/:date',
+          name: 'date',
+          component: wellBeingApp,
+        },
       ]
     },
     // {

@@ -13,7 +13,7 @@ export const useTodoStore = defineStore('todo', () => {
   }
 
   const findOne = async (day: Day): Promise<Todo> => {    
-    const todo = todoItems.value.find((item): boolean => item.day === day.dayNumber && item.month === day.monthNumber && item.year === parseInt(day.year as string) )
+    const todo = todoItems.value.find((item): boolean => item.day === day.dayNumber && item.month === day.monthNumber && item.year === day.year )
 
     return todo
   }

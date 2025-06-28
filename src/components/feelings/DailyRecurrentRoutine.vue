@@ -54,7 +54,8 @@ const deleteRoutine = async () => {
     </button>
 
     <label :for="routine.id" v-for="(routine, routineId) in routines" :key="routineId" class="flex flex-wrap items-center">
-      <input v-if="asCheckBox" :id="routine.id" type="checkbox" v-model="routine.done" @change="updateRoutine(routine)">
+      <!-- <input v-if="asCheckBox" :id="routine.id" type="checkbox" v-model="routine.done" @change="updateRoutine(routine)"> -->
+      <div v-if="asCheckBox" class="rounded-[50%] w-2 h-2 mr-3 border-1 border-solid border-blue-500" :class="{'bg-blue-500': routine.done}"></div>
       <p :class="{'done': routine.done}">
         {{ routine.title }}
       </p>

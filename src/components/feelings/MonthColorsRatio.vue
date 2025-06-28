@@ -47,13 +47,16 @@ const showTendenceFn = (): void => {
 </script>
 
 <template>
-  <button @click="showTendenceFn" class="flex items-center mt-1">
-    <span>
-      {{ tendenceButtonText }}
-    </span>
-    <Arrow class="color-meaning_icon w-2 h-2 ml-2 transition duration-300 fill-(--tail-btn-color)" :class="{'rotate-180' : showTendence}"/>
-  </button>
-  
+  <!-- <div class="flex items-center"> -->
+    <button @click="showTendenceFn" class="flex items-center mt-1">
+      <span>
+        {{ tendenceButtonText }}
+      </span>
+      <Arrow class="color-meaning_icon w-2 h-2 ml-2 transition duration-300 fill-(--tail-btn-color)" :class="{'rotate-180' : showTendence}"/>
+    </button>
+    <!-- <slot></slot>
+  </div> -->
+
   <Transition name="fade">
     <div v-if="showTendence">
       <p class="border-l-5 border-l-solid border-l p-2 inline-block mt-1" :class="monthTendency ? 'text-green-500 ' : 'text-red-500 '">

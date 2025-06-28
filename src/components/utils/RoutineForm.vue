@@ -35,7 +35,7 @@ const formSubmit = async () => {
     <section>
       <div class="flex items-center justify-between">
         <h3 class="title-h3">
-          Créer une nouvelle routine récurrente
+          Créer une nouvelle tâche
         </h3>
       </div>
       
