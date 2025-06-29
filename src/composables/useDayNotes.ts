@@ -1,19 +1,19 @@
-// composables/useTodos.ts
+// composables/useDayNotes.ts
 import { ref } from 'vue'
-import type { Todo } from '@/types/Todo'
+import type { DayNote } from '@/types/DayNote'
 
-export const useTodos = () => {
-  const todoItems = ref<Todo[]>([])
+export const useDayNotes = () => {
+  const dayNoteItems = ref<DayNote[]>([])
   const loading = ref(false)
   const error = ref<Error | null>(null)
 
-  const fetchTodos = async () => {
+  const fetchDayNotes = async () => {
     loading.value = true
     try {
-      const res = await fetch('/api/todos')
+      const res = await fetch('/api/dayNotes')
       if (!res.ok) throw new Error('Erreur serveur')
       const data = await res.json()
-      todoItems.value = data
+      dayNoteItems.value = data
     } catch (err: any) {
       error.value = err
     } finally {
@@ -21,12 +21,12 @@ export const useTodos = () => {
     }
   }
 
-  const updateTodo = async (item: Todo, method: string): Promise<{status: number, message: string}> => {
+  const updateDayNote = async (item: DayNote, method: string): Promise<{status: number, message: string}> => {
     loading.value = true
     try {
-      let fetchUri = '/api/todos/'+ item.id
+      let fetchUri = '/api/dayNotes/'+ item.id
 
-      if (method === 'POST') fetchUri = '/api/todos/'
+      if (method === 'POST') fetchUri = '/api/dayNotes/'
       
       const res = await fetch(fetchUri, {
         method,
@@ -58,10 +58,10 @@ export const useTodos = () => {
   }
 
   return {
-    todoItems,
+    dayNoteItems,
     loading,
     error,
-    fetchTodos,
-    updateTodo,
+    fetchDayNotes,
+    updateDayNote,
   }
 }

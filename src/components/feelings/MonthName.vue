@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {  previousNextMonth } from '@/composables/UseDate'
+import {  usePreviousNextMonth } from '@/composables/useDate'
 
 const props = defineProps<{
   routeMonth: string,
@@ -9,7 +9,7 @@ const props = defineProps<{
 const router = useRouter()
 
 const GetPreviousNextMonth = (direction: string) => {
-  const monthNameUpadated = previousNextMonth(props.routeMonth, direction)
+  const monthNameUpadated = usePreviousNextMonth(props.routeMonth, direction)
   
   router.push({ name: 'month', params: { year: props.routeYear, month: monthNameUpadated} })
 }

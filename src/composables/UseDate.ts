@@ -1,32 +1,21 @@
-import { Todo } from "@/types/Todo"
+import { DayNote } from "@/types/DayNote"
 
 const date = new Date()
 
-// export const months = {
-//   french: ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
-//   english: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-// }
-export const months = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
-export const days = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi" ]
+export const useMonths = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
+export const useDays = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi" ]
 
-// export const currentMonthNumber = () => date.getMonth()
-// export const currentMonthNumberAdjusted = date.getMonth() + 1
-
-// export const currentMonthName = (lang: string) => months[lang][date.getMonth()]
-// export const currentYear = () => date.getFullYear()
-
-
-export const previousNextMonth = (monthName: string, direction: string): string => {
-  let actualMonth = months.indexOf(monthName)
+export const usePreviousNextMonth = (monthName: string, direction: string): string => {
+  let actualMonth = useMonths.indexOf(monthName)
 
   if (direction === 'next') actualMonth += 1
   else actualMonth -= 1
 
-  return months[actualMonth]
+  return useMonths[actualMonth]
 }
 
-export const previousNextDate = (day: Todo, direction: string): { date: number, month: number, year: number } => {
-  let actualDate = day.day
+export const usePreviousNextDate = (day: DayNote, direction: string): { date: number, month: number, year: number } => {
+  let actualDate = day.date
 
   // Gérer le cas du passage au mois suivant 31, 32 juin n'existe pas
   if (direction === 'next') actualDate += 1
@@ -35,20 +24,34 @@ export const previousNextDate = (day: Todo, direction: string): { date: number, 
   return { date: actualDate, month: day.month, year: day.year as number }
 }
 
-export const daysInMonth = (month: number, year: number): number => {
+// return the number of days in a month : 28, 30, 31
+export const useDaysInMonth = (month: number, year: number): number => {
   return new Date(year, month + 1, 0).getDate()
 }
 
-export const monthNumber = (monthName: string) => months.indexOf(monthName)
+export const useMonthName = (monthNumber: number) => useMonths[monthNumber] // return 5 = juin, 6 = juillet etc.
+export const useMonthNumber = (monthName: string) => useMonths.indexOf(monthName) // return juin = 5, juillet = 6 etc.
 
-export const dayNumber = (date: number, month: number, year: number) => {
+// return lundi -> dimanche
+export const useDayNumber = (date: number, month: number, year: number) => {
   const d = new Date(year, month, date)
-  return days[d.getDay()]
+  return useDays[d.getDay()]
 }
 
-export const currentDate = date.getDate() // 1er au 31
-export const currentDayNumber = date.getDay() // 1 à 7
-export const currentDay = days[date.getDay()] // 0 à 6
+export const useCurrentDate = date.getDate() // 1er au 31
+export const useCurrentDayNumber = date.getDay() // 0 à 6
+export const useCurrentDay = useDays[date.getDay()] // lundi, mardi..
+export const useCurrentMonth = date.getMonth() // Janvier, fevrier...
+export const useCurrentYear = date.getFullYear() // 2025, 2026...
 
-export const currentMonth = date.getMonth()
-export const currentYear = date.getFullYear()
+
+// export const useMonths = {
+//   french: ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
+//   english: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+// }
+
+// export const useCurrentMonthNumber = () => date.getMonth()
+// export const useCurrentMonthNumberAdjusted = date.getMonth() + 1
+
+// export const useCurrentMonthName = (lang: string) => useMonths[lang][date.getMonth()]
+// export const useCurrentYear = () => date.getFullYear()

@@ -1,7 +1,7 @@
 // CurrentRoutine interface
 export interface CurrentRoutine {
     id: string,
-    day: number,
+    date: number,
     month: number,
     year: number,
     title: string,

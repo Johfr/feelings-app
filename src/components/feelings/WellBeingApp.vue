@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import MonthsTotalDays from '@/components/feelings/MonthsTotalDays.vue'
-import DayMoments from '@/components/feelings/DayMoments.vue'
-import MonthColorsRatio from '@/components/feelings/MonthColorsRatio.vue'
+import CalendarMonthsTotalDays from '@/components/feelings/CalendarMonthsTotalDays.vue'
+import CalendarMomentsColor from '@/components/feelings/CalendarMomentsColor.vue'
+import MonthTendence from '@/components/feelings/MonthTendence.vue'
 import ColorsMeaning from '@/components/feelings/ColorsMeaning.vue'
-import Content from '@/components/feelings/Content.vue'
+import DailyMoments from '@/components/feelings/DailyMoments.vue'
 import MonthGoal from '@/components/feelings/MonthGoal.vue'
 import MonthName from '@/components/feelings/MonthName.vue'
 import DailyRecurrentRoutine from '@/components/feelings/DailyRecurrentRoutine.vue'
 import Drawner from '@/components/utils/Drawer.vue'
 import Popin from '@/components/utils/Popin.vue'
 import BackButton from '@/components/utils/BackButton.vue'
-import { monthNumber, currentDay, currentDate, currentMonth, currentYear } from '@/composables/UseDate'
-import { useTodoStore } from '@/stores/todoStore'
+import { useMonthNumber, useCurrentDay, useCurrentDate, useCurrentMonth, useCurrentYear } from '@/composables/useDate'
+import { useDayNoteStore } from '@/stores/dayNoteStore'
 import { Day } from '@/types/Day'
 import { RecurrentRoutine } from '@/types/RecurrentRoutine'
 import { useRecurrentRoutineStore } from '@/stores/recurrentRoutineStore'
@@ -24,15 +24,15 @@ const recurrentRoutinesStore = useRecurrentRoutineStore()
 recurrentRoutinesStore.loadRoutines()
 const recurrentRoutines = computed((): RecurrentRoutine[] => recurrentRoutinesStore.items)
 const currentRoutineLeft = computed((): CurrentRoutine[] => currentRoutinesStore.items.filter(routine => {
-  if (routine.day === currentDate && routine.month === currentMonth && routine.year === currentYear) {
+  if (routine.date === useCurrentDate && routine.month === useCurrentMonth && routine.year === useCurrentYear) {
     return !routine.done
   }
 })
 )
 // const currentRoutine = computed((): RecurrentRoutine[] => currentRoutinesStore.items)
 
-const store = useTodoStore()
-store.loadTodos()
+const store = useDayNoteStore()
+store.loadDayNotes()
 
 const showDrawer = ref<boolean>(false)
 const showDrawerFn = () => {
@@ -44,21 +44,21 @@ const router = useRouter()
 const routeMonth = computed(() => route.params.month as string)
 const routeYear = computed(() => route.params.year as string)
 const routeYearNumber = Number(routeYear.value)
-const routeMonthNumber = computed((): number  => monthNumber(routeMonth.value))
-const currentDailyRoutineTotal = computed((): number => currentRoutinesStore.items.filter(routine => routine.day === currentDate && routine.month === currentMonth && routine.year === routeYearNumber).length)
+const routeMonthNumber = computed((): number  => useMonthNumber(routeMonth.value))
+const currentDailyRoutineTotal = computed((): number => currentRoutinesStore.items.filter(routine => routine.date === useCurrentDate && routine.month === useCurrentMonth && routine.year === routeYearNumber).length)
 
 const daySelected = ref<Day>()
 const showPopin = ref<boolean>(false)
 
-const showPopinFn = (dayNumber: number):void => {
+const showPopinFn = (date: number):void => {
   showPopin.value = !showPopin.value  
 
-  router.push({ path: `/well-being-app/${routeYear.value}/${routeMonth.value}/${dayNumber}` })
+  router.push({ path: `/well-being-app/${routeYear.value}/${routeMonth.value}/${date}` })
 
   daySelected.value = {
     id: null,
-    dayNumber: dayNumber,
-    monthNumber: routeMonthNumber.value,
+    date,
+    month: routeMonthNumber.value,
     year: routeYearNumber
   }
 }
@@ -109,7 +109,7 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
     <MonthName :routeMonth="routeMonth" :routeYear="routeYearNumber" />
 
     <!-- Tâches restantes  -->
-    <div class="mt-3 ml-2 cursor-pointer" v-if="currentDailyRoutineTotal && currentDailyRoutineTotal > 0" @click="showPopinFn(currentDate)">
+    <div class="mt-3 ml-2 cursor-pointer inline-block" v-if="currentDailyRoutineTotal && currentDailyRoutineTotal > 0" @click="showPopinFn(useCurrentDate)">
       <p v-if="currentRoutineLeft.length === 0" class="text-indigo-400">
         Félicitation ! Tu as réalisé toutes tes tâches de ta journée. Tu peux être fier de toi !
       </p>
@@ -119,26 +119,36 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
       </p>
     </div>
 
-    <MonthColorsRatio :month="routeMonth" :year="routeYearNumber" />
+    <MonthTendence :month="routeMonth" :year="routeYearNumber" />
 
     <MonthGoal :routeMonthNumber="routeMonthNumber" :routeYear="routeYearNumber" />
     
     <!-- Calendrier -->
-    <MonthsTotalDays :month="routeMonthNumber" :yearNumber="routeYearNumber">
-      <template v-slot:item="slotProps">
-        <!-- <div v-if="(routeMonthNumber < currentMonth || (slotProps.dayNumber < currentDate && routeMonthNumber === currentMonth))" class="day_finished right" />
-        <div v-if="(routeMonthNumber < currentMonth || (slotProps.dayNumber < currentDate && routeMonthNumber === currentMonth))" class="day_finished left" /> -->
+     <div class="md:flex md:justify-between md:gap-10">
+      <CalendarMonthsTotalDays :month="routeMonthNumber" :yearNumber="routeYearNumber">
+        <template v-slot:item="slotProps">
+          <!-- <div v-if="(routeMonthNumber < useCurrentMonth || (slotProps.date < useCurrentDate && routeMonthNumber === useCurrentMonth))" class="day_finished right hidden md:block" />
+          <div v-if="(routeMonthNumber < useCurrentMonth || (slotProps.date < useCurrentDate && routeMonthNumber === useCurrentMonth))" class="day_finished left hidden md:block" /> -->
+          <div class="day_number-wrapper" @click="showPopinFn(slotProps.date)">
+            <p
+              class="day_number"
+              :class="{ 'text-[#aab0b2]': (
+                routeMonthNumber < useCurrentMonth
+                || (slotProps.date < useCurrentDate
+                && routeMonthNumber === useCurrentMonth)
+              )}"
+            >
+              {{ slotProps.date }}
+            </p>
+          </div>
+        </template>
+        <template v-slot="slotProps">
+          <CalendarMomentsColor :month="routeMonth" :year="routeYearNumber" :date="slotProps.date" />
+        </template>
+      </CalendarMonthsTotalDays>
 
-        <p class="day_number" :class="{ 'opacity-[0.3]': (routeMonthNumber < currentMonth || (slotProps.dayNumber < currentDate && routeMonthNumber === currentMonth))}" @click="showPopinFn(slotProps.dayNumber)">
-          {{ slotProps.dayNumber }}
-        </p>
-      </template>
-      <template v-slot="slotProps">
-        <DayMoments :month="routeMonth" :year="routeYearNumber" :dayNumber="slotProps.dayNumber" />
-      </template>
-    </MonthsTotalDays>
-
-    <ColorsMeaning />
+      <ColorsMeaning />
+    </div>
 
     <!-- <Teleport to="#app"> -->
     <Drawner v-model="showDrawer">
@@ -150,7 +160,7 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
   <!-- <Transition name="slide-fade">
     <Popin v-if="showPopin" v-model="showPopin">
       <div class="popin-content">
-        <Content :daySelected="daySelected"/>
+        <DailyMoments :daySelected="daySelected"/>
       </div>
     </Popin>
   </Transition> -->
@@ -159,7 +169,7 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
     <Teleport to="#app">
       <Drawner v-model="showPopin">
         <div class="popin-content">
-          <Content v-if="showPopin" :daySelected="daySelected"/>
+          <DailyMoments v-if="showPopin" :daySelected="daySelected"/>
         </div>
       </Drawner>
     </Teleport>
@@ -175,20 +185,30 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
 
 .month-container {
   transition: .2s;
+
   &.fade {
     opacity: .5;
+    // color: #aab0b2; //bdc3c5
   }
-}
 
-.day_number {
+  // @media (min-width: 960px) {
+  //   margin-right: 290px;
+  // }
+}
+.day_number-wrapper {
   width: 100%;
   height: 100%;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 12px;
+  justify-content: flex-end;
+  align-items: flex-start;
+  margin-right: 5px;
+  margin-top: 5px;
   position: relative;
-  z-index: 2;
+}
+
+.day_number {
+  font-size: 12px;
+  position: absolute;
 }
 .day_finished {
   width: 70%;
@@ -196,19 +216,19 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
   border-left: 1px solid;
   border-bottom: 1px solid;
   position: absolute;
-  z-index: 0;
+  z-index: 3;
 
   &.right {
     top: 63%;
     right: -35%;
     transform: rotate(45deg) translate(-50%, -50%);
-    border-color: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.08);
   }
   &.left {
     top: 15%;
     left: -33%;
     transform: rotate(-135deg);
-    border-color: rgba(255, 0, 0, 0.04);
+    border-color: rgba(255, 0, 0, 0.08);
   }
 }
 </style>

@@ -2,9 +2,6 @@
 import { ref } from 'vue'
 import type { Colors } from '@/types/Colors'
 
-// fusionner useColors, useTodos et useGoal ?
-// renommer le fichier en useApi ?
-
 export const useColors = () => {
   const colorItems = ref<Colors[]>([])
   const loading = ref(false)

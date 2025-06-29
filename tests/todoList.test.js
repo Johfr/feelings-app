@@ -1,13 +1,13 @@
 import { mount } from '@vue/test-utils'
-import TodoList from '@components/tests/TodoList.vue'
+import DayNoteList from '@components/tests/DayNoteList.vue'
 
 
 
-describe('TodoList', () => {
+describe('DayNoteList', () => {
   let wrapper
 
   beforeEach(() => {
-    wrapper = mount(TodoList, {
+    wrapper = mount(DayNoteList, {
       props: {
         tasks: [
           {

@@ -1,20 +1,24 @@
 <script setup lang="ts">
-import { daysInMonth, monthNumber, previousNextMonth } from '@/composables/UseDate'
+import { useDaysInMonth, useCurrentDate, useMonthNumber, usePreviousNextMonth } from '@/composables/useDate'
 
 const props = defineProps<{
   month: number,
   yearNumber: number,
 }>()
 
-const totalMonthDays = computed(() => daysInMonth(props.month, props.yearNumber) )
+const totalMonthDays = computed(() => useDaysInMonth(props.month, props.yearNumber) )
 </script>
 
 <template>
   <ul class="day-list">
-    <li class="day-item relative" v-for="(dayNumber, dayIndex) of totalMonthDays" :key="dayIndex">
-      <slot name="item" :dayNumber="dayNumber" />
+    <li
+      v-for="(date, dayIndex) of totalMonthDays" :key="dayIndex"
+      class="day-item relative"
+      :class="{'md:border-1 md:border-dashed md:border-red-300': date === useCurrentDate}"
+    >
+      <slot name="item" :date="date" />
 
-      <slot :dayNumber="dayNumber" />
+      <slot :date="date" />
     </li>
   </ul>
 </template>
@@ -25,9 +29,11 @@ const totalMonthDays = computed(() => daysInMonth(props.month, props.yearNumber)
   flex-wrap: wrap;
   gap: var(--gap-10);
   margin-top: 50px;
-  // @media (min-width: 960px) {
-  //   margin-top: 0;
-  // }
+  
+  @media (min-width: 960px) {
+    width: 100%;
+    max-width: 85%;
+  }
 }
 .day-item {
   display: flex;
@@ -35,15 +41,14 @@ const totalMonthDays = computed(() => daysInMonth(props.month, props.yearNumber)
   align-items: center;
   flex-wrap: wrap;
   width: 11%;
-  height: 30px;
+  height: 35px;
   cursor: pointer;
   position: relative;
-  // background-color: #fff;
 
   @media (min-width: 960px) {
     width: 13%;
     height: 80px;
-    // border: 1px solid #f1f1f1;
+    background-color: #fff;
   }
 
   // &_day {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { months, monthNumber } from '@/composables/UseDate'
+import { useMonths, useMonthNumber } from '@/composables/useDate'
 import BackButton from '@/components/utils/BackButton.vue'
-import MonthsTotalDays from '@/components/feelings/MonthsTotalDays.vue'
+import CalendarMonthsTotalDays from '@/components/feelings/CalendarMonthsTotalDays.vue'
 
 const route = useRoute()
 const year = computed(() => route.params.year as string)
@@ -14,19 +14,19 @@ const routeYearNumber = Number(year.value)
    <h1 class="title-h1 text-red-500 border-b border-solid border-red-500 mb-8"> {{ year }}</h1>
 
    <ul class="list">
-    <li class="item" v-for="(month, monthIndex) of months" :key="monthIndex">
+    <li class="item" v-for="(month, monthIndex) of useMonths" :key="monthIndex">
       <RouterLink :to="{ path: `/well-being-app/${year}/${month}` }" class="item_link">
         <span class="block md:mb-5">
           {{ month }}
         </span>
 
-        <MonthsTotalDays class="months-total-days" :month="monthNumber(month)" :yearNumber="routeYearNumber">
+        <CalendarMonthsTotalDays class="months-list_total-days" :month="useMonthNumber(month)" :yearNumber="routeYearNumber">
           <template v-slot:item="slotProps">
             <p class="day_number">
-              {{ slotProps.dayNumber }}
+              {{ slotProps.date }}
             </p>
           </template>
-        </MonthsTotalDays>
+        </CalendarMonthsTotalDays>
       </RouterLink>
     </li>
    </ul>
@@ -64,7 +64,7 @@ const routeYearNumber = Number(year.value)
   // }
 }
 
-.months-total-days {
+.months-list_total-days {
   gap: 0;
   
   @media (min-width: 960px) {
@@ -73,6 +73,7 @@ const routeYearNumber = Number(year.value)
 
   :deep(.day-item) {
     width: 14%;
+    
     @media (min-width: 960px) {
       width: auto;
       height: auto;

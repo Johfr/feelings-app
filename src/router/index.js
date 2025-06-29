@@ -2,13 +2,11 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@views/HomeView.vue'
 
 import Apps from '@views/apps.vue'
-import Years from '@/components/feelings/Years.vue'
-import Months from '@/components/feelings/Months.vue'
+import MonthsList from '@/components/feelings/MonthsList.vue'
 import wellBeingApp from '@/components/feelings/wellBeingApp.vue'
-
-// import Article from '@views/Article.vue'
 import NotFound from '@views/NotFound.vue'
-import { useTodoStore } from '@/stores/todoStore'
+// import { useDayNoteStore } from '@/stores/dayNoteStore'
+// import YearsList from '@/components/feelings/YearsList.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,7 +24,7 @@ const router = createRouter({
         {
           path: ':year',
           name: 'year',
-          component: Months,
+          component: MonthsList,
         },
         {
           path: ':year/:month',
@@ -76,30 +74,10 @@ const router = createRouter({
       component: HomeView,
     },
     {
-      path: '/todo',
-      name: 'Todo',
+      path: '/dayNote',
+      name: 'DayNote',
       component: HomeView,
     },
-    // {
-    //   path: '/todo/article',
-    //   name: 'Article',
-    //   component: Article,
-    //   props: route => ({ id: route.params.id, asCreateTodoButton: false }),
-    //   beforeEnter: async (to, from, next) => {
-    //     const store = useTodoStore()
-    //     if (store.todoItems.length === 0) {
-    //       await store.loadTodos()
-    //     }
-    //     next()
-    //   },
-    //   children: [
-    //     {
-    //       path: ':id',
-    //       name: 'article-detail',
-    //       component: Article
-    //     }
-    //   ]
-    // },
     { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
   ]
 })

@@ -45,7 +45,8 @@ const showFormFn = (type: string, data: Colors = null): void => {
 </script>
 
 <template>
-  <div class="relative mt-[50px]">
+  <!-- md:flex md:flex-col items-start md:flex-wrap -->
+  <div class="relative mt-[50px] md:max-w-[30%] md:flex md:flex-row-reverse items-start">
     <button title="Tout modifier" class="color_icon --full-update" @click="showFormFn('all')" >
       <span>
         Modifier tout
@@ -81,12 +82,15 @@ const showFormFn = (type: string, data: Colors = null): void => {
 
 <style scoped lang="scss">
 .color_icon {
-  margin-bottom: 16px;
-  @media (min-width: 960px) {
-    position: absolute;
-    top: -10px;
-    right: 0;
-  }
+  padding: 0;
+  // margin-bottom: 16px;
+  // margin-left: auto;
+
+  // @media (min-width: 960px) {
+  //   position: absolute;
+  //   top: -10px;
+  //   right: 0;
+  // }
 }
 .color_list {
   display: flex;
@@ -103,7 +107,7 @@ const showFormFn = (type: string, data: Colors = null): void => {
   @media (min-width: 960px) {
     align-items: center;
     flex-direction: row;
-    width: 20%;
+    width: 100%;
     font-size: 16px;
   }
 

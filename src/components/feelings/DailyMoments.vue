@@ -6,17 +6,17 @@ import Sun from '@/assets/svg/sun.svg?component'
 import Drawner from '@/components/utils/Drawer.vue'
 import DailyCurrentRoutine from '@/components/feelings/DailyCurrentRoutine.vue'
 import Form from '@/components/utils/Form.vue'
-import { days, dayNumber, months, monthNumber, currentDay, currentMonth } from '@/composables/UseDate'
+import DailyDayName from '@/components/feelings/DailyDayName.vue'
+import { useDays, useDayNumber, useMonths, useMonthNumber, useCurrentDay, useCurrentMonth } from '@/composables/useDate'
 import { useColorStore } from '@/stores/colorStore'
-import { useTodoStore } from '@/stores/todoStore'
+import { useDayNoteStore } from '@/stores/dayNoteStore'
 import { useCurrentRoutineStore } from '@/stores/currentRoutineStore'
 import { useRecurrentRoutineStore } from '@/stores/recurrentRoutineStore'
 import { Colors } from '@/types/Colors'
 import { Day } from '@/types/Day'
-import { Todo } from '@/types/Todo'
+import { DayNote } from '@/types/DayNote'
 import { CurrentRoutine } from '@/types/CurrentRoutine'
 import { RecurrentRoutine } from '@/types/RecurrentRoutine'
-import DayDate from './DayDate.vue'
 
 const currentRoutinesStore = useCurrentRoutineStore()
 currentRoutinesStore.loadRoutines()
@@ -24,64 +24,21 @@ currentRoutinesStore.loadRoutines()
 const recurrentRoutinesStore = useRecurrentRoutineStore()
 recurrentRoutinesStore.loadRoutines()
 
-// const colorsTranscription = [
-//   {
-//     color: 'blue',
-//     hexadecimal : '#ffc0cb'
-//   },
-//   {
-//     color: 'orange',
-//     hexadecimal : '#ffc0cb'
-//   },
-//   {
-//     color: 'yellow',
-//     hexadecimal : '#ffc0cb'
-//   },
-//   {
-//     color: 'pink',
-//     hexadecimal : '#ffc0cb'
-//   },
-//   {
-//     color: 'red',
-//     hexadecimal : '#ffc0cb'
-//   },
-//   {
-//     color: 'brown',
-//     hexadecimal : '#ffc0cb'
-//   },
-//   {
-//     color: 'violet',
-//     hexadecimal : '#ffc0cb'
-//   },
-//   {
-//     color: 'green',
-//     hexadecimal : '#ffc0cb'
-//   },
-//   {
-//     color: 'black',
-//     hexadecimal : '#ffc0cb'
-//   },
-//   {
-//     color: 'white',
-//     hexadecimal : '#ffc0cb'
-//   },
-// ]
-
 const props = defineProps<{
   daySelected: Day
 }>()
 
-const day = ref<Todo>()
+const day = ref<DayNote>()
 
-const findTodo = async (daySelected: Day) => await useTodoStore().findOne(daySelected).then((todoFind: Todo) => {
-  if (todoFind) {
-    day.value = todoFind
+const findDayNote = async (daySelected: Day) => await useDayNoteStore().findOne(daySelected).then((dayNoteFind: DayNote) => {
+  if (dayNoteFind) {
+    day.value = dayNoteFind    
   }
   else {
     day.value =  {
       id: daySelected.id,
-      day: daySelected.dayNumber,
-      month: daySelected.monthNumber,
+      date: daySelected.date,
+      month: daySelected.month,
       year: daySelected.year,
       moments: [
         {
@@ -104,9 +61,9 @@ const findTodo = async (daySelected: Day) => await useTodoStore().findOne(daySel
   }
 })
 
-onMounted(() => findTodo(props.daySelected))
+onMounted(() => findDayNote(props.daySelected))
 
-const currentRoutines = computed((): CurrentRoutine[] => currentRoutinesStore.items.filter(item => item.day === day.value.day && item.month === day.value.month && item.year === day.value.year ))
+const currentRoutines = computed((): CurrentRoutine[] => currentRoutinesStore.items.filter(item => item.date === day.value.date && item.month === day.value.month && item.year === day.value.year ))
 const recurrentRoutines = computed((): RecurrentRoutine[] => recurrentRoutinesStore.items)
 
 const store = useColorStore()
@@ -118,17 +75,17 @@ const dateSelected = ref<Day>(props.daySelected)
 const updateDate = async (dateUpdated: { date: number, month: number, year: number }) => {
   dateSelected.value = {
     id: null,
-    dayNumber: dateUpdated.date,
-    monthNumber: dateUpdated.month,
+    date: dateUpdated.date,
+    month: dateUpdated.month,
     year: dateUpdated.year
   }
 
-  await findTodo({ id: null, dayNumber: dateUpdated.date, monthNumber: day.value.month, year: day.value.year })  
+  await findDayNote({ id: null, date: dateUpdated.date, month: day.value.month, year: day.value.year })  
 }
 
 // mets à jour le contenu de la popin après un create
 const updateData = () => {
-  findTodo(dateSelected.value)
+  findDayNote(dateSelected.value)
 }
 
 const formSection = ref<string>('')
@@ -146,7 +103,7 @@ const showDrawerFn = () => {
 
 // CRUD CURRENT STORE
 const createNewRoutine = async (routine: CurrentRoutine) => {
-  routine.day = day.value.day
+  routine.date = day.value.date
   routine.month = day.value.month
   routine.year = Number(day.value.year)
   routine.type = routine.type ?? 'current'
@@ -185,15 +142,11 @@ const pourRecurrentRoutines = async () => {
 <template>
   <section class="content-section" v-if="day">
     <!-- Titre -->
-    <div class="flex items-center justify-between">
-      <!-- <h1 class="title-h2">
-        {{ day.day }} {{ months[day.month]}} {{ day.year }}
-        <span>></span>
-      </h1> -->
-      <DayDate :day="day" @update="updateDate"/>
+    <div class="xl:flex xl:items-center xl:justify-between">
+      <DailyDayName :day="day" @update="updateDate"/>
 
       <button @click="showDrawerFn" class="">
-        Mes Todos
+        Tâches du jour
       </button>
     </div>
 
@@ -201,9 +154,9 @@ const pourRecurrentRoutines = async () => {
     <!-- Moments de la journée: morning, afternoon, night -->
     <div class="mt-10" v-for="(moment, momentIndex) in day.moments" :key="momentIndex">
       <section class="flex items-center cursor-pointer" @click="showFormFn(moment.moment)" title="Modifier">
-        <Sunrise v-if="moment.moment === 'morning'" class="moment-svg border-1 border-solid border-[moment.color]" :style="{borderColor: moment.color}" />
-        <Sun v-if="moment.moment === 'afternoon'" class="moment-svg border-1 border-solid" :style="{borderColor: moment.color}" />
-        <Moon v-if="moment.moment === 'night'" class="moment-svg border-1 border-solid" :style="{borderColor: moment.color}" />
+        <Sunrise v-if="moment.moment === 'morning'" class="moment-svg morning border-1 border-solid border-[moment.color]" :style="{borderColor: moment.color}" />
+        <Sun v-if="moment.moment === 'afternoon'" class="moment-svg afternoon border-1 border-solid" :style="{borderColor: moment.color}" />
+        <Moon v-if="moment.moment === 'night'" class="moment-svg night border-1 border-solid" :style="{borderColor: moment.color}" />
 
         <!-- Block couleur et signification -->
         <div class="flex items-start flex-col ml-3">
@@ -224,7 +177,7 @@ const pourRecurrentRoutines = async () => {
       </section>
 
       <Transition name="slide-fade">
-        <Form v-if="showForm && formSection === moment.moment" v-model="showForm" :itemId="day.id || '-1'" :moment="moment" :day="{ id: day.id || '-1', dayNumber: day.day, monthNumber: day.month, year: day.year }" @create="updateData" />
+        <Form v-if="showForm && formSection === moment.moment" v-model="showForm" :itemId="day.id || '-1'" :moment="moment" :day="{ id: day.id || '-1', date: day.date, month: day.month, year: day.year }" @create="updateData" />
       </Transition>
       
       <p v-if="moment.content">
@@ -236,7 +189,13 @@ const pourRecurrentRoutines = async () => {
     <!-- Drawer daily routine jour -->
     <Teleport to="#app">
       <Drawner v-model="showDrawer">
-        <DailyCurrentRoutine :title="`Tâches du ${dayNumber(day.day, day.month, Number(day.year))} ${day.day} ${months[day.month]} ${day.year}`" :routines="currentRoutines" :asCheckBox="true" @create="createNewRoutine" @update="updateRoutine" @confirm="deleteRoutine">
+        <DailyCurrentRoutine title="Tâche du :" :routines="currentRoutines" :asCheckBox="true" @create="createNewRoutine" @update="updateRoutine" @confirm="deleteRoutine">
+          <template #title>
+            <h2 class="title-h2">
+              <!-- {{ `Tâches du ${useDayNumber(day.date, day.month, Number(day.year))} ${day.date} ${useMonths[day.month]} ${day.year}` }} -->
+              <DailyDayName :day="day" @update="updateDate"/>
+            </h2>
+          </template>
           <template #cta>
             <button @click="pourRecurrentRoutines">Importer les routines récurrentes</button>
           </template>
@@ -250,8 +209,6 @@ const pourRecurrentRoutines = async () => {
 .content-section {
   width: 100%;
   position: relative;
-  // @media (min-width: 960px) {
-  // }
 }
 
 .color-block {
@@ -262,10 +219,30 @@ const pourRecurrentRoutines = async () => {
 }
 
 .moment-svg {
-  width: 70px;
-  height: 70px;
-  padding: var(--padding);
+  width: 50px;
+  height: 50px;
+  padding: 10px;
   background-color: #ece7f3;
   border-radius: 16px;
+
+  &.morning {
+    background-color: blue;
+    fill: #fff;
+  }
+  &.afternoon {
+    background-color: yellow;
+    fill: #000; // defaut: none
+    stroke: #000;
+  }
+  &.night {
+    background-color: darkblue;
+    fill: #fff; // defaut: none
+  }
+  
+  @media (min-width: 960px) {
+    width: 60px;
+    height: 60px;
+    padding: var(--padding);
+  }
 }
 </style>

@@ -22,7 +22,11 @@ body {
   &.night {
     /* 00064f : bleu nuit */
     /* 000867 : bleu nuit 2 */
-    background-image: radial-gradient(circle 0px at 98% 15%, transparent, transparent, transparent, #eee);
+    /* d5d7e7 */
+    /* c5c8df */
+    /* background-image: radial-gradient(circle 0px at 98% 15%, transparent, transparent, transparent, #d5d7e7); */
+    background-image: none;
+    background-color: #def0f7; /* f4fcff */
     /* color: #fff; */
     /* background-color: #00064f75; */
   }

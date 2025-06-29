@@ -34,7 +34,7 @@ const showDrawerFn = ():void => {
 
   @media (min-width: 1024px) {
     right: -40%;
-    width: 40%;
+    width: 30%;
   }
 
   &.show {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useTodoStore } from '@/stores/todoStore'
-import { monthNumber } from '@/composables/UseDate'
-import { Todo } from '@/types/Todo'
+import { useDayNoteStore } from '@/stores/dayNoteStore'
+import { useMonthNumber } from '@/composables/useDate'
+import { DayNote } from '@/types/DayNote'
 import GraphBar from '@/components/graphs/GraphBar.vue'
 import { useColorsStats } from '@/composables/useColorsStats'
 import Arrow from '@/assets/svg/arrow.svg?component'
@@ -12,14 +12,14 @@ const colorStore = useColorStore()
 colorStore.loadColors()
 const colorsData = computed((): Colors[] => colorStore.colorItems)
 
-const store = useTodoStore()
+const store = useDayNoteStore()
 
 const props = defineProps<{
   month: string,
   year: number,
 }>()
 
-const data = computed((): Todo[] => store.todoItems.filter((item: Todo) => item.month === monthNumber(props.month) && item.year === props.year))
+const data = computed((): DayNote[] => store.dayNoteItems.filter((item: DayNote) => item.month === useMonthNumber(props.month) && item.year === props.year))
 
 const { colorStats, totalPoints, totalColors } = useColorsStats(colorsData, data)
 

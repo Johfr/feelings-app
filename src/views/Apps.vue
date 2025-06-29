@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Years from '@/components/feelings/Years.vue'
+import YearsList from '@/components/feelings/YearsList.vue'
 import Drawer from '@/components/utils/Drawer.vue';
 import Sidebar from '@/components/utils/Sidebar.vue';
 
@@ -14,7 +14,7 @@ const year = computed(() => route.params.year)
   <main class="main">
     <!-- <Sidebar v-model="showDrawer" /> -->
     
-    <Years v-if="!year" />
+    <YearsList v-if="!year" />
     <router-view></router-view>
   </main>
   

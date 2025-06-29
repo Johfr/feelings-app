@@ -27,7 +27,7 @@ export const useGoalStore = defineStore('goal', () => {
     return resp
   }
 
-  const createGoal = async (newGoalTitle: string, routeMonthNumber : number, routeYear : number): Promise<{status: number, message: string}> => {
+  const createGoal = async (newGoalTitle: string, routeMonthNumber: number, routeYear: number): Promise<{status: number, message: string}> => {
     const newGoal = {
       id: crypto.randomUUID(),
       goal: newGoalTitle,

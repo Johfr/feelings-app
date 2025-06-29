@@ -5,7 +5,7 @@ import ConfirmBox from '@/components/utils/ConfirmBox.vue'
 
 const props = defineProps<{
   routines: CurrentRoutine[],
-  title: string,
+  title?: string,
   asCheckBox?: boolean
 }>()
 
@@ -68,7 +68,7 @@ const deleteRoutine = async () => {
     <slot name="title"></slot>
     
     <slot name="cta"></slot>
-    <button type="button" @click="crudRoutine({ id: null, day: null, month: null, year: null, title: null, done: null, type: null })">
+    <button type="button" @click="crudRoutine({ id: null, date: null, month: null, year: null, title: null, done: null, type: null })">
       Ajouter une tâche
     </button>
 

@@ -31,7 +31,7 @@ export const useCurrentRoutineStore = defineStore('CurrentRoutine', () => {
   const createRoutine = async (routine: CurrentRoutine): Promise<{status: number, message: string}> => {
     const newRoutine = {
       id: crypto.randomUUID(),
-      day: routine.day,
+      date:routine.date,
       month: routine.month,
       year: routine.year,
       title: routine.title,

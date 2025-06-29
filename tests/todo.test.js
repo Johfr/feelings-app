@@ -1,8 +1,8 @@
 import { mount } from '@vue/test-utils'
-import TodoApp from '@components/tests/Todo.vue'
+import DayNoteApp from '@components/tests/DayNote.vue'
 
 test('affiche une tâche', () => {
-  const wrapper = mount(TodoApp)
+  const wrapper = mount(DayNoteApp)
 
   const todo = wrapper.get('[data-test="todo"]')
 
@@ -10,7 +10,7 @@ test('affiche une tâche', () => {
 })
 
 test('créé une tâche', async () => {
-  const wrapper = mount(TodoApp)
+  const wrapper = mount(DayNoteApp)
   expect(wrapper.findAll('[data-test="todo"]')).toHaveLength(1)
 
   await wrapper.get('[data-test="new-todo"]').setValue('New todo')
@@ -21,7 +21,7 @@ test('créé une tâche', async () => {
 
 
 test('marque une tâche comme terminée', async () => {
-  const wrapper = mount(TodoApp)
+  const wrapper = mount(DayNoteApp)
 
   await wrapper.get('[data-test="todo-checkbox"]').setValue(true)
 
@@ -29,7 +29,7 @@ test('marque une tâche comme terminée', async () => {
 })
 
 test('marque une tâche comme terminée', async () => {
-  const wrapper = mount(TodoApp)
+  const wrapper = mount(DayNoteApp)
 
   const label = wrapper.get('[data-test="label"]')
   

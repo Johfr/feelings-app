@@ -2,14 +2,14 @@
 import { computed } from 'vue'
 // import { colorsMeaning } from '@/composables/useColorsMeaning'
 import { Colors } from '@/types/Colors'
-import { Todo } from '@/types/Todo'
+import { DayNote } from '@/types/DayNote'
 
 // Helper pour obtenir le "point" d'une couleur
 const getColorPoint = (colors: ComputedRef<Colors[]>, color: string): number => {
   return colors.value.find(c => c.color === color)?.point ?? 0
 }
 
-export const useColorsStats = (colors: ComputedRef<Colors[]>, dataRef: ComputedRef<Todo[]>) => {
+export const useColorsStats = (colors: ComputedRef<Colors[]>, dataRef: ComputedRef<DayNote[]>) => {
   const allColors = computed(() =>
     dataRef.value.flatMap(day =>
       day.moments.map(moment => moment.color).filter(color => color)

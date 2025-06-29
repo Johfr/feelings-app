@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useTodoStore } from '@/stores/todoStore'
+import { useDayNoteStore } from '@/stores/dayNoteStore'
 import { DayMoments } from '@/types/DayMoments'
 import { Day } from '@/types/Day'
 
@@ -28,7 +28,7 @@ const formSubmit = async () => {
   
   // create
   if (props.itemId === '-1') {
-    const resp = await useTodoStore().create(props.day, momentUpdated)
+    const resp = await useDayNoteStore().create(props.day, momentUpdated)
     
     if (resp.status === 201) {
       showFormFn()
@@ -36,7 +36,7 @@ const formSubmit = async () => {
     }
   }
   else {
-    const resp = await useTodoStore().update(props.itemId, momentUpdated)
+    const resp = await useDayNoteStore().update(props.itemId, momentUpdated)
     
     if (resp.status === 200) {
       showFormFn()

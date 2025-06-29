@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { monthNumber } from '@/composables/UseDate'
-import { useTodoStore } from '@/stores/todoStore'
-import { Todo } from '@/types/Todo'
+import { useMonthNumber } from '@/composables/useDate'
+import { useDayNoteStore } from '@/stores/dayNoteStore'
+import { DayNote } from '@/types/DayNote'
 
 const props = defineProps<{
-  dayNumber: number,
+  date: number,
   month: string,
   year: number,
 }>()
 
-const store = useTodoStore()
-store.loadTodos()
+const store = useDayNoteStore()
+store.loadDayNotes()
 
-const data = computed((): Todo[] => {
-  const itemsFound = store.todoItems.filter(item => {
-    if (item.month === monthNumber(props.month) && item.year === props.year && item.day === props.dayNumber) {
+const data = computed((): DayNote[] => {
+  const itemsFound = store.dayNoteItems.filter(item => {
+    if (item.month === useMonthNumber(props.month) && item.year === props.year && item.date === props.date) {
       return item
     }
   })
@@ -24,7 +24,7 @@ const data = computed((): Todo[] => {
 </script>
 
 <template>
-  <ul class="item_color-container" v-for="(day, dayIndex) in data" :key="dayIndex" v-show="day.day === dayNumber">
+  <ul class="item_color-container" v-for="(day, dayIndex) in data" :key="dayIndex" v-show="day.date === date">
     <li
       v-for="moment in day.moments"
       :key="moment.moment"
@@ -46,13 +46,22 @@ const data = computed((): Todo[] => {
   width: 100%;
   position: absolute;
   bottom: 0;
+  z-index: 2;
+
+  @media (min-width: 960px) {
+    display: block;
+    width: 3px;
+    height: 100%;
+    left: 0;
+    top: 0;
+  }
 }
 .item_color-block {
   width: 100%;
   height: 1px;
 
   @media (min-width: 960px) {
-    height: 2px;
+    height: 33%;
   }
 }
 </style>
