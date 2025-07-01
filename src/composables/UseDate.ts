@@ -82,7 +82,7 @@ export const useDayNumber = (date: number, month: number, year: number) => {
 export const useCurrentDate = date.getDate() // 1er au 31
 export const useCurrentDayNumber = date.getDay() // 0 à 6
 export const useCurrentDay = useDays[date.getDay()] // lundi, mardi..
-export const useCurrentMonth = date.getMonth() // Janvier, fevrier...
+export const useCurrentMonth = date.getMonth() // 0 à 11
 export const useCurrentYear = date.getFullYear() // 2025, 2026...
 
 

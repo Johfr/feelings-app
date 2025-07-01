@@ -8,30 +8,25 @@ import MonthGoal from '@/components/feelings/MonthGoal.vue'
 import MonthName from '@/components/feelings/MonthName.vue'
 import DailyRecurrentRoutine from '@/components/feelings/DailyRecurrentRoutine.vue'
 import Drawner from '@/components/utils/Drawer.vue'
-import Popin from '@/components/utils/Popin.vue'
+// import Popin from '@/components/utils/Popin.vue'
 import BackButton from '@/components/utils/BackButton.vue'
-import { useMonthNumber, useCurrentDay, useDayNumber, useCurrentDate, useCurrentMonth, useCurrentYear } from '@/composables/useDate'
+import { useMonthName, useMonthNumber, useCurrentDay, useDayNumber, useCurrentDate, useCurrentMonth, useCurrentYear } from '@/composables/useDate'
 import { useDayNoteStore } from '@/stores/dayNoteStore'
 import { Day } from '@/types/Day'
 import { RecurrentRoutine } from '@/types/RecurrentRoutine'
 import { useRecurrentRoutineStore } from '@/stores/recurrentRoutineStore'
 import { useCurrentRoutineStore } from '@/stores/currentRoutineStore'
 import { CurrentRoutine } from '@/types/CurrentRoutine'
+import DailyTasksRemaining from './DailyTasksRemaining.vue'
 
 const currentRoutinesStore = useCurrentRoutineStore()
 currentRoutinesStore.loadRoutines()
 const recurrentRoutinesStore = useRecurrentRoutineStore()
 recurrentRoutinesStore.loadRoutines()
 const recurrentRoutines = computed((): RecurrentRoutine[] => recurrentRoutinesStore.items)
-const currentRoutineLeft = computed((): CurrentRoutine[] => currentRoutinesStore.items.filter(routine => {
-  if (routine.date === useCurrentDate && routine.month === useCurrentMonth && routine.year === useCurrentYear) {
-    return !routine.done
-  }
-})
-)
 
-const store = useDayNoteStore()
-store.loadDayNotes()
+const noteStore = useDayNoteStore()
+noteStore.loadDayNotes()
 
 const showDrawer = ref<boolean>(false)
 const showDrawerFn = () => {
@@ -39,12 +34,11 @@ const showDrawerFn = () => {
 }
 
 const route = useRoute()
-const router = useRouter()
+// const router = useRouter()
 const routeMonth = computed(() => route.params.month as string)
+const routeMonthNumber = computed((): number  => useMonthNumber(routeMonth.value))
 const routeYear = computed(() => route.params.year as string)
 const routeYearNumber = computed(() => Number(routeYear.value))
-const routeMonthNumber = computed((): number  => useMonthNumber(routeMonth.value))
-const currentDailyRoutineTotal = computed((): number => currentRoutinesStore.items.filter(routine => routine.date === useCurrentDate && routine.month === useCurrentMonth && routine.year === routeYearNumber.value).length)
 
 // retourne uniquement les routines du mois affiché
 const currentRoutines = computed((): CurrentRoutine[] => currentRoutinesStore.items.filter(routine => routine.month === routeMonthNumber.value && routine.year === routeYearNumber.value) )
@@ -56,16 +50,16 @@ const showPopinFn = ():void => {
   showPopin.value = !showPopin.value
 }
 
-const openPopin = (date: number):void => {
+const openPopin = (date: number, month: number, year: number):void => {
   showPopinFn() 
 
-  router.push({ path: `/well-being-app/${routeYear.value}/${routeMonth.value}/${date}` })
+  // router.push({ path: `/well-being-app/${useMonthName(useCurrentMonth)}/${useCurrentYear}/${date}` })
 
   daySelected.value = {
     id: null,
     date,
-    month: routeMonthNumber.value,
-    year: routeYearNumber.value
+    month,
+    year
   }
 }
 
@@ -115,15 +109,7 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
     <MonthName :routeMonth="routeMonth" :routeYear="routeYearNumber" />
 
     <!-- Tâches restantes  -->
-    <div class="mt-3 ml-2 cursor-pointer inline-block" v-if="currentDailyRoutineTotal && currentDailyRoutineTotal > 0" @click="openPopin(useCurrentDate)">
-      <p v-if="currentRoutineLeft.length === 0" class="text-indigo-400">
-        Félicitation ! Tu as réalisé toutes tes tâches de ta journée. Tu peux être fier de toi !
-      </p>
-      
-      <p v-else class="text-indigo-400">
-        {{ currentRoutineLeft.length }} tâches restantes pour aujourd'hui. Tu peux le faire 💪
-      </p>
-    </div>
+    <DailyTasksRemaining @openpopin="openPopin"/>
 
     <MonthTendence :month="routeMonth" :year="routeYearNumber" />
 
@@ -145,7 +131,7 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
             )
             ? 'text-[#aab0b2] bg-[#ffffff8c]'
             : 'bg-white'"
-            @click="openPopin(slotProps.date)" 
+            @click="openPopin(slotProps.date, routeMonthNumber, routeYearNumber)" 
           >
             <p
               class="day_number"
