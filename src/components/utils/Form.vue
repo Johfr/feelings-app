@@ -81,6 +81,12 @@ form {
   right: 0;
   bottom: 0;
   background-color: #fff;
+  @media (min-width: 768px) {
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+  }
 }
 
 label {
@@ -89,7 +95,7 @@ label {
 }
 
 textarea {
-  min-height: 200px;
+  min-height: 300px;
 }
 
 textarea, input {

@@ -22,7 +22,7 @@ const routeYearNumber = Number(year.value)
 
         <CalendarMonthsTotalDays class="months-list_total-days" :month="useMonthNumber(month)" :yearNumber="routeYearNumber">
           <template v-slot:item="slotProps">
-            <p class="day_number">
+            <p v-if="slotProps.date" class="day_number">
               {{ slotProps.date }}
             </p>
           </template>

@@ -1,27 +1,68 @@
 import { DayNote } from "@/types/DayNote"
+import { ref } from "vue"
 
 const date = new Date()
 
 export const useMonths = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
 export const useDays = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi" ]
 
-export const usePreviousNextMonth = (monthName: string, direction: string): string => {
+export const usePreviousNextMonth = (monthName: string, year: number, direction: string):  { month: string, year: number } => {
   let actualMonth = useMonths.indexOf(monthName)
+  let currentYear = year
 
-  if (direction === 'next') actualMonth += 1
-  else actualMonth -= 1
+  if (direction === 'next') {
+    if (actualMonth === 11) { // décembre
+      actualMonth = 0
+      currentYear += 1
+    } else {
+      actualMonth += 1
+    }
+  } else if (direction === 'previous') {
+    if (actualMonth === 0) { // janvier
+      actualMonth = 11
+      currentYear -= 1
+    } else {
+      actualMonth -= 1
+    }
+  }
 
-  return useMonths[actualMonth]
+  return { month: useMonths[actualMonth], year: currentYear }
 }
 
-export const usePreviousNextDate = (day: DayNote, direction: string): { date: number, month: number, year: number } => {
-  let actualDate = day.date
+export const usePreviousNextDate = (date: number, month: number, year: number, direction: string): { date: number, month: number, year: number } => {
+  let actualDate = date // 1->31
+  let totalMonthDays = useDaysInMonth(month, year) // 28, 30, 31
+  let actualMonth = month // number
+  let currentYear = year 
+  
+  if (direction === 'next') {
+    if (actualDate === totalMonthDays) {
+      actualDate = 0
 
-  // Gérer le cas du passage au mois suivant 31, 32 juin n'existe pas
-  if (direction === 'next') actualDate += 1
-  else actualDate -= 1  
+      // décembre à janvier
+      if (actualMonth === 11) {
+        actualMonth = 0
+        currentYear += 1
+      } else {
+        actualMonth += 1
+      }
+    }
+    actualDate += 1
+  } else {
+    if (actualDate === 1) {
+      if (actualMonth === 0) {
+        actualMonth = 11
+        currentYear -= 1
+      } else {
+        actualMonth -= 1
+      }
+      actualDate = useDaysInMonth(actualMonth, currentYear)
+    } else {
+      actualDate -= 1
+    }
+  }
 
-  return { date: actualDate, month: day.month, year: day.year as number }
+  return { date: actualDate, month: actualMonth, year: currentYear }
 }
 
 // return the number of days in a month : 28, 30, 31

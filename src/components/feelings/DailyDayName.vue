@@ -11,16 +11,23 @@ const router = useRouter()
 const emit = defineEmits(['update'])
 
 // const routerPush = (routeName: string, params: {year: number, month: number, date: number}) => router.push({ name: routeName, params })
-const routerPush = (routeName: string, year: number, month: number, date: number) => router.push({ name: routeName, params: { year, month, date } })
+const routerPush = (routeName: string, year: number, month: string, date: number) => router.push({ name: routeName, params: { year, month, date } })
 
+const localDate = ref<number>(props.day.date)
+const localMonth = ref<number>(props.day.month)
+const localYear = ref<number>(props.day.year)
 
 const GetPreviousNextDate = (direction: string) => {
-  const dateUpadated = usePreviousNextDate(props.day, direction)
+  const dateUpdated = usePreviousNextDate( localDate.value, localMonth.value, localYear.value, direction)
+  
+  localMonth.value = dateUpdated.month
+  localDate.value = dateUpdated.date
+  localYear.value = dateUpdated.year
 
-  emit('update', dateUpadated)
-
-  // routerPush('date', { year: dateUpadated.year, month: useMonthName[dateUpadated.month], date: dateUpadated.date})
-  routerPush('date', dateUpadated.year, useMonthName[dateUpadated.month], dateUpadated.date)
+  const monthUpdated = useMonthName(dateUpdated.month)
+  
+  routerPush('date', dateUpdated.year, monthUpdated, dateUpdated.date)  
+  emit('update', dateUpdated)
 
 }
 </script>
@@ -29,7 +36,7 @@ const GetPreviousNextDate = (direction: string) => {
   <div class="title-container">
     <span class="previous-button" @click="GetPreviousNextDate('previous')"><</span>
     <h2 class="title-h2">
-      {{ useDayNumber(day.date, day.month, Number(day.year)) }} {{ day.date }} {{ useMonths[day.month]}} {{ day.year }}
+      {{ useDayNumber(localDate, localMonth, Number(localYear)) }} {{ localDate }} {{ useMonths[localMonth]}} {{ localYear }}
     </h2>
     <span class="next-button" @click="GetPreviousNextDate('next')">></span>
 

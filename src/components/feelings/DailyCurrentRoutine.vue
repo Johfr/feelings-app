@@ -92,7 +92,7 @@ const deleteRoutine = async () => {
         class="routine-list flex flex-wrap justify-between items-center py-3 cursor-context-menu"
       >
         <!-- <input v-if="asCheckBox" :id="routine.id" type="checkbox" class="w-4 h-4 mr-3" v-model="routine.done" @input="toggleDone(routine)"> -->
-        <div class="flex items-center">
+        <div class="flex items-baseline">
           <!-- pastille  bleue -->
           <div
             v-if="asCheckBox"

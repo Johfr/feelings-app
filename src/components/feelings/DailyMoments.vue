@@ -80,12 +80,13 @@ const updateDate = async (dateUpdated: { date: number, month: number, year: numb
     year: dateUpdated.year
   }
 
-  await findDayNote({ id: null, date: dateUpdated.date, month: day.value.month, year: day.value.year })  
+  // await findDayNote({ id: null, date: dateUpdated.date, month: day.value.month, year: day.value.year })
+  findDayNote(dateSelected.value)
 }
 
 // mets à jour le contenu de la popin après un create
-const updateData = () => {
-  findDayNote(dateSelected.value)
+const updateData = async () => {
+  await findDayNote(dateSelected.value)
 }
 
 const formSection = ref<string>('')
@@ -176,10 +177,11 @@ const pourRecurrentRoutines = async () => {
         </div>
       </section>
 
-      <Transition name="slide-fade">
-        <Form v-if="showForm && formSection === moment.moment" v-model="showForm" :itemId="day.id || '-1'" :moment="moment" :day="{ id: day.id || '-1', date: day.date, month: day.month, year: day.year }" @create="updateData" />
-      </Transition>
-      
+      <Teleport to=".popin-content">
+        <Transition name="slide-fade">
+          <Form v-if="showForm && formSection === moment.moment" v-model="showForm" :itemId="day.id || '-1'" :moment="moment" :day="{ id: day.id || '-1', date: day.date, month: day.month, year: day.year }" @create="updateData" />
+        </Transition>
+      </Teleport>
       <p v-if="moment.content">
         {{ moment.content }}
       </p>
@@ -189,7 +191,7 @@ const pourRecurrentRoutines = async () => {
     <!-- Drawer daily routine jour -->
     <Teleport to="#app">
       <Drawner v-model="showDrawer">
-        <DailyCurrentRoutine title="Tâche du :" :routines="currentRoutines" :asCheckBox="true" @create="createNewRoutine" @update="updateRoutine" @confirm="deleteRoutine">
+        <DailyCurrentRoutine v-if="showDrawer" title="Tâche du :" :routines="currentRoutines" :asCheckBox="true" @create="createNewRoutine" @update="updateRoutine" @confirm="deleteRoutine">
           <template #title>
             <h2 class="title-h2">
               <!-- {{ `Tâches du ${useDayNumber(day.date, day.month, Number(day.year))} ${day.date} ${useMonths[day.month]} ${day.year}` }} -->
