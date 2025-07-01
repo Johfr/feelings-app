@@ -2,6 +2,7 @@
 import { RecurrentRoutine } from '@/types/RecurrentRoutine'
 
 const props = defineProps<{
+  title: string,
   routineSelected: RecurrentRoutine
 }>()
 
@@ -35,7 +36,7 @@ const formSubmit = async () => {
     <section>
       <div class="flex items-center justify-between">
         <h3 class="title-h3">
-          Créer une nouvelle tâche
+          {{ title }}
         </h3>
       </div>
       
@@ -66,6 +67,7 @@ form {
   left: 0;
   right: 0;
   bottom: 0;
+  z-index: 5;
 }
 
 label {

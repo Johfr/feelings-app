@@ -11,18 +11,26 @@ export const useCurrentRoutineStore = defineStore('CurrentRoutine', () => {
 
   // const findOne = async (month: number, year: number): Promise<CurrentRoutine> => items.value.find((item): boolean => item.year === year && item.month === month)
   
-  const updateRoutine = async (itemId: string, titleUpdated: string, done: boolean): Promise<{status: number, message: string}> => {  
-    const index = items.value.findIndex((item): Boolean => item.id === itemId)
+  const updateRoutine = async (routine: CurrentRoutine): Promise<{status: number, message: string}> => {  
+    const index = items.value.findIndex((item): Boolean => item.id === routine.id)
 
-    const itemCopy = {...items.value[index]}
-    itemCopy.title = titleUpdated
-    itemCopy.done = done    
+    let itemCopy = {...items.value[index]}
+    itemCopy.title = routine.title
+    itemCopy.done = routine.done
+    itemCopy.date = routine.date
+    itemCopy.month = routine.month
+    itemCopy.year = routine.year
+    // itemCopy = {...routine, type: itemCopy.type, id: itemCopy.id}
 
     const resp = await update(itemCopy, 'PUT')
 
     // maj faite, on met à jour localement
     if (resp.status === 200) {
-      items.value[index].title = itemCopy.title    
+      items.value[index].title = itemCopy.title
+      items.value[index].done = itemCopy.done
+      items.value[index].date = itemCopy.date
+      items.value[index].month = itemCopy.month
+      items.value[index].year = itemCopy.year
     }
 
     return resp

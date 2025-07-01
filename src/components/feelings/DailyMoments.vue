@@ -72,7 +72,7 @@ const colorsData = computed((): Colors[] => store.colorItems)
 
 const dateSelected = ref<Day>(props.daySelected)
 
-const updateDate = async (dateUpdated: { date: number, month: number, year: number }) => {
+const updateDailyDate = async (dateUpdated: { date: number, month: number, year: number }) => {
   dateSelected.value = {
     id: null,
     date: dateUpdated.date,
@@ -118,7 +118,7 @@ const createNewRoutine = async (routine: CurrentRoutine) => {
 }
 
 const updateRoutine = async (routine: CurrentRoutine) => {
-  const resp = await currentRoutinesStore.update(routine.id, routine.title, routine.done)
+  const resp = await currentRoutinesStore.update(routine)
 
   // if (resp.status === 200) {
   //   toaster('ok')
@@ -144,7 +144,7 @@ const pourRecurrentRoutines = async () => {
   <section class="content-section" v-if="day">
     <!-- Titre -->
     <div class="xl:flex xl:items-center xl:justify-between">
-      <DailyDayName :day="day" @update="updateDate"/>
+      <DailyDayName :day="day" @update="updateDailyDate"/>
 
       <button @click="showDrawerFn" class="">
         Tâches du jour
@@ -195,7 +195,7 @@ const pourRecurrentRoutines = async () => {
           <template #title>
             <h2 class="title-h2">
               <!-- {{ `Tâches du ${useDayNumber(day.date, day.month, Number(day.year))} ${day.date} ${useMonths[day.month]} ${day.year}` }} -->
-              <DailyDayName :day="day" @update="updateDate"/>
+              <DailyDayName :day="day" @update="updateDailyDate"/>
             </h2>
           </template>
           <template #cta>

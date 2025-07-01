@@ -64,7 +64,7 @@ const deleteRoutine = async () => {
     </label>
 
     <Transition name="slide-fade">
-      <RoutineForm v-if="showRoutineForm" v-model="showRoutineForm" :routineSelected="routineSelected" @create="createNewRoutine" @update="updateRoutine" />
+      <RoutineForm v-if="showRoutineForm" v-model="showRoutineForm" title="Créer une nouvelle tâche" :routineSelected="routineSelected" @create="createNewRoutine" @update="updateRoutine" />
     </Transition>
 
     <Transition name="slide-fade">

@@ -80,9 +80,11 @@ form {
   left: 0;
   right: 0;
   bottom: 0;
+  z-index: 5;
   background-color: #fff;
+
   @media (min-width: 768px) {
-    top: 20px;
+    top: 38px;
     left: 20px;
     right: 20px;
     bottom: 20px;

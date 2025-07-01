@@ -5,6 +5,8 @@ import ConfirmBox from '@/components/utils/ConfirmBox.vue'
 import CalendarIcon from '@/assets/svg/calendar.svg?component'
 import Pencil from '@/assets/svg/pencil.svg?component'
 import Trash from '@/assets/svg/trash.svg?component'
+import ArrowIcon from '@/assets/svg/arrow.svg?component'
+import { usePreviousNextDate, useMonthName } from '@/composables/useDate'
 
 const props = defineProps<{
   routines: CurrentRoutine[],
@@ -13,7 +15,6 @@ const props = defineProps<{
 }>()
 
 // trier par 
-// const localRoutines = ref<CurrentRoutine[]>(props.routines)
 const sortedRoutines = computed(() => {
   return [...props.routines].sort((a, b) => Number(a.done) - Number(b.done))
 })
@@ -35,27 +36,61 @@ const crudRoutine = (routine: CurrentRoutine, type: string = ''): void => {
   routineSelected.value = routine
 }
 
-// const sortByDone = () => {
-//   localRoutines.value.sort((a: CurrentRoutine, b: CurrentRoutine) => {
-//     // false < true : les non faites (false) restent en haut
-//     return Number(a.done) - Number(b.done)
-//   }) 
-// }
-
 const toggleDone = (routine: CurrentRoutine) => {
   routine.done = !routine.done
   updateRoutine(routine)
 }
 
-const showNewCalendar = ref<boolean>(false)
-const toggleShowNewCalendar = () => {
-  showNewCalendar.value = !showNewCalendar.value
+const specificDate = ref<{date : number, month : number, year : number}>({date: null, month: null, year: null})
+
+const openedDropdownId = ref<string | null>(null)
+
+const toggleDropdown = () => {
+  openedDropdownId.value = null
 }
-const openNewCalendar = () => {
-  toggleShowNewCalendar()
+
+const resetDateForm = () => {
+  specificDate.value.date = null
+  specificDate.value.month = null
+  specificDate.value.year = null
+}
+
+const formatDate = (event: Event) => {
+  const target = event.target as HTMLInputElement | null
+  if (!target?.value) return
+  const inputDateSplitted = target.value.split('-')
+  specificDate.value.date = Number(inputDateSplitted[2])
+  specificDate.value.month = Number(inputDateSplitted[1])
+  specificDate.value.year = Number(inputDateSplitted[0])
+}
+
+const updateRoutineDate = (routine: CurrentRoutine, direction: string) => {
+  const updatedDate = usePreviousNextDate(routine.date, routine.month, routine.year, 'next')
+  const updatedDateTwice = usePreviousNextDate(updatedDate.date, updatedDate.month, updatedDate.year, 'next')
+
+  if (direction === 'nextDay') {
+    routine.date = updatedDate.date
+    routine.month = updatedDate.month
+    routine.year = updatedDate.year
+  } else if (direction === 'twoNextDay') {
+    routine.date = updatedDateTwice.date
+    routine.month = updatedDateTwice.month
+    routine.year = updatedDateTwice.year
+  } else if (direction === 'specificDate') {
+    routine.date = specificDate.value.date
+    routine.month = specificDate.value.month - 1
+    routine.year = specificDate.value.year
+  }
+  
+  updateRoutine(routine)
+}
+
+const openDropdown = (id: string) => {
+  openedDropdownId.value = (openedDropdownId.value === id) ? null : id
 }
 
 const emit = defineEmits(['create', 'update', 'confirm'])
+
 // CRUD RECURRENT STORE
 const createNewRoutine = async (newRoutine: string) => {
   emit('create', {...routineSelected.value, title: newRoutine})
@@ -63,6 +98,8 @@ const createNewRoutine = async (newRoutine: string) => {
 
 const updateRoutine = async (routine: CurrentRoutine) => {
   emit('update', routine)
+  toggleDropdown()
+  resetDateForm()
 }
 
 const deleteRoutine = async () => {
@@ -84,43 +121,69 @@ const deleteRoutine = async () => {
       Ajouter une tâche
     </button>
 
-    <!--  border-b border-gray-100 pb-3 -->
-    <ol class="list-decimal">
-      <li
-        :for="routine.id" v-for="(routine, routineId) in sortedRoutines"
-        :key="routine.id"
-        class="routine-list flex flex-wrap justify-between items-center py-3 cursor-context-menu"
-      >
-        <!-- <input v-if="asCheckBox" :id="routine.id" type="checkbox" class="w-4 h-4 mr-3" v-model="routine.done" @input="toggleDone(routine)"> -->
-        <div class="flex items-baseline">
-          <!-- pastille  bleue -->
-          <div
-            v-if="asCheckBox"
-            class="rounded-[50%] min-w-2 w-2 h-2 mr-3 border-1 border-solid border-blue-500"
-            :class="{'bg-blue-500': routine.done}"
-          />
+    <Transition name="slide-fade">
+      <ol class="list-decimal" v-if="sortedRoutines.length > 0">
+        <li
+          :for="routine.id" v-for="(routine, routineId) in sortedRoutines"
+          :key="routine.id"
+          class="routine-list flex flex-wrap justify-between flex-col py-3 cursor-context-menu relative"
+        >
+          <!-- <input v-if="asCheckBox" :id="routine.id" type="checkbox" class="w-4 h-4 mr-3" v-model="routine.done" @input="toggleDone(routine)"> -->
+          <div class="flex items-baseline">
+            <!-- pastille  bleue -->
+            <div
+              v-if="asCheckBox"
+              class="rounded-[50%] min-w-2 w-2 h-2 mr-3 border-1 border-solid border-blue-500"
+              :class="{'bg-blue-500': routine.done}"
+            />
 
-          <p
-            :class="{'done': routine.done}"
-            @click="toggleDone(routine)"
-            title="cliquer pour valider"
-          >
-            {{ routine.title }}
-          </p>
-        </div>
+            <p
+              :class="{'done': routine.done}"
+              @click="toggleDone(routine)"
+              title="cliquer pour valider"
+            >
+              {{ routine.title }}
+            </p>
+          </div>
 
-        <div class="cta-container flex items-center opacity-0">
-          <!-- <button type="button" class="" @click="crudRoutine(routine)">Modifier</button> -->
-          <Pencil class="svg mr-3" @click="crudRoutine(routine)" title="modifier"/>
-          <!-- <button type="button" class="delete-button" @click="crudRoutine(routine, 'delete')">Supprimer</button> -->
-          <Trash class="svg mr-3" @click="crudRoutine(routine, 'delete')" title="supprimer"/>
-          <CalendarIcon class="svg" title="reprogrammer" @click="openNewCalendar"/>
-        </div>
-      </li>
-    </ol>
+          <div class="cta-container flex items-center justify-end md:opacity-0">
+            <Pencil class="svg mr-3" @click="crudRoutine(routine)" title="modifier"/>
+            <Trash class="svg mr-3" @click="crudRoutine(routine, 'delete')" title="supprimer"/>
+            <CalendarIcon class="svg" title="reprogrammer" @click="openDropdown(routine.id)"/>
+          </div>
+          
+          <div v-show="openedDropdownId === routine.id" class="dropdown-overlay" @click="openedDropdownId = null"></div>
+          <div v-show="openedDropdownId === routine.id" class="dropdown">
+            <h3 class="border-b-1 border-b-gray-300 border-b-solid mb-2">Date d'échéance</h3>
+            <button type="button" class="w-[100%] text-left my-1" @click="updateRoutineDate(routine, 'nextDay')">Demain</button>
+            <button type="button" class="w-[100%] text-left my-1" @click="updateRoutineDate(routine, 'twoNextDay')">Après demain</button>
+
+            <form>
+              <label for="date-picker" class="button block w-[100%] relative">
+                <span>
+                  Une date spécifique
+                  <ArrowIcon class="svg"/>
+                </span>
+
+                <input id="date-picker" type="date" @change="formatDate">
+              </label>
+            </form>
+
+            <form v-show="specificDate?.date" class="date-form border-t-1 border-t-gray-300 border-solid text-center mt-3 pt-2 pb-5">
+              <p class="title-h2">Déplacer au :</p>
+              <span>
+                {{ specificDate.date }} {{ useMonthName(specificDate.month - 1) }} {{ specificDate.year }}
+              </span>
+              <button type="button" class="submit w-[100%] mt-3" @click="updateRoutineDate(routine, 'specificDate')">Valider</button>
+              <button type="button" class="w-[100%]" @click="resetDateForm">Annuler</button>
+            </form>
+          </div>
+        </li>
+      </ol>
+    </Transition>
 
     <Transition name="slide-fade">
-      <RoutineForm v-if="showRoutineForm" v-model="showRoutineForm" :routineSelected="routineSelected" @create="createNewRoutine" @update="updateRoutine" />
+      <RoutineForm v-if="showRoutineForm" v-model="showRoutineForm" title="Mettre à jour une tâche" :routineSelected="routineSelected" @create="createNewRoutine" @update="updateRoutine" />
     </Transition>
 
     <Transition name="slide-fade">
@@ -135,8 +198,7 @@ const deleteRoutine = async () => {
 }
 .done {
   position: relative;
-  // opacity: .6;
-  // text-decoration: line-through;
+  
   &::before {
     content: "";
     width: 0;
@@ -159,11 +221,70 @@ const deleteRoutine = async () => {
 
 .routine-list {
   .cta-container {
+    position: relative;
     transition: .4s ease;
+    z-index: 4;
   }
   &:hover .cta-container {
     opacity: 1;
   }
+}
+
+.dropdown {
+  width: 200px;
+  min-height: 10px;
+  padding: 5px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  border-radius: 5px;
+  z-index: 5;
+}
+
+button[type='button'].submit {
+  color: #fff;
+}
+button[type='button'], label {
+  padding: 0;
+  color: #000;
+  border-radius: 5px;
+  padding: 5px;
+
+  &:hover {
+    background-color: #f1f1f1;
+  }
+}
+
+.dropdown-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background-color: rgba(0, 195, 255, 0.05);
+  z-index: 4;
+}
+
+input[type='date']::-webkit-calendar-picker-indicator {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 4;
+}
+input[type='date'] {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  opacity: 0;
+  cursor: pointer;
+  box-sizing: border-box;
 }
 
 </style>
