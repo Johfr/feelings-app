@@ -106,8 +106,8 @@ code {
   top: 5px;
   right: 5px;
   cursor: pointer;
-  fill: white;
-  stroke: black;
+  /* fill: white; */
+  /* stroke: black; */
 }
 
 button {

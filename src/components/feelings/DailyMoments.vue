@@ -226,7 +226,7 @@ const pourRecurrentRoutines = async () => {
   border-radius: 16px;
 
   &.morning {
-    background-color: blue;
+    background-color: dodgerblue; //blue
     fill: #fff;
   }
   &.afternoon {

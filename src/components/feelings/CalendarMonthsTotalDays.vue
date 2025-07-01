@@ -37,9 +37,9 @@ const totalMonthDays = computed(() => useDaysInMonth(props.month, props.yearNumb
 }
 .day-item {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
+  // justify-content: center;
+  // align-items: center;
+  // flex-wrap: wrap;
   width: 11%;
   height: 35px;
   cursor: pointer;
@@ -48,7 +48,7 @@ const totalMonthDays = computed(() => useDaysInMonth(props.month, props.yearNumb
   @media (min-width: 960px) {
     width: 13%;
     height: 80px;
-    background-color: #fff;
+    // background-color: #fff;
   }
 
   // &_day {

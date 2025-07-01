@@ -2,6 +2,9 @@
 import RoutineForm from '@/components/utils/RoutineForm.vue'
 import { CurrentRoutine } from '@/types/CurrentRoutine'
 import ConfirmBox from '@/components/utils/ConfirmBox.vue'
+import CalendarIcon from '@/assets/svg/calendar.svg?component'
+import Pencil from '@/assets/svg/pencil.svg?component'
+import Trash from '@/assets/svg/trash.svg?component'
 
 const props = defineProps<{
   routines: CurrentRoutine[],
@@ -44,6 +47,14 @@ const toggleDone = (routine: CurrentRoutine) => {
   updateRoutine(routine)
 }
 
+const showNewCalendar = ref<boolean>(false)
+const toggleShowNewCalendar = () => {
+  showNewCalendar.value = !showNewCalendar.value
+}
+const openNewCalendar = () => {
+  toggleShowNewCalendar()
+}
+
 const emit = defineEmits(['create', 'update', 'confirm'])
 // CRUD RECURRENT STORE
 const createNewRoutine = async (newRoutine: string) => {
@@ -68,19 +79,45 @@ const deleteRoutine = async () => {
     <slot name="title"></slot>
     
     <slot name="cta"></slot>
+
     <button type="button" @click="crudRoutine({ id: null, date: null, month: null, year: null, title: null, done: null, type: null })">
       Ajouter une tâche
     </button>
 
-    <label :for="routine.id" v-for="(routine) in sortedRoutines" :key="routine.id" class="flex flex-wrap items-center">
-      <!-- <input v-if="asCheckBox" :id="routine.id" type="checkbox" class="w-4 h-4 mr-3" v-model="routine.done" @input="toggleDone(routine)"> -->
-      <div v-if="asCheckBox" class="rounded-[50%] w-2 h-2 mr-3 border-1 border-solid border-blue-500" :class="{'bg-blue-500': routine.done}"></div>
-      <p :class="{'done': routine.done}" @click="toggleDone(routine)">
-        {{ routine.title }}
-      </p>
-      <button type="button" class="" @click="crudRoutine(routine)">Modifier</button>
-      <button type="button" class="delete-button" @click="crudRoutine(routine, 'delete')">Supprimer</button>
-    </label>
+    <!--  border-b border-gray-100 pb-3 -->
+    <ol class="list-decimal">
+      <li
+        :for="routine.id" v-for="(routine, routineId) in sortedRoutines"
+        :key="routine.id"
+        class="routine-list flex flex-wrap justify-between items-center py-3 cursor-context-menu"
+      >
+        <!-- <input v-if="asCheckBox" :id="routine.id" type="checkbox" class="w-4 h-4 mr-3" v-model="routine.done" @input="toggleDone(routine)"> -->
+        <div class="flex items-center">
+          <!-- pastille  bleue -->
+          <div
+            v-if="asCheckBox"
+            class="rounded-[50%] min-w-2 w-2 h-2 mr-3 border-1 border-solid border-blue-500"
+            :class="{'bg-blue-500': routine.done}"
+          />
+
+          <p
+            :class="{'done': routine.done}"
+            @click="toggleDone(routine)"
+            title="cliquer pour valider"
+          >
+            {{ routine.title }}
+          </p>
+        </div>
+
+        <div class="cta-container flex items-center opacity-0">
+          <!-- <button type="button" class="" @click="crudRoutine(routine)">Modifier</button> -->
+          <Pencil class="svg mr-3" @click="crudRoutine(routine)" title="modifier"/>
+          <!-- <button type="button" class="delete-button" @click="crudRoutine(routine, 'delete')">Supprimer</button> -->
+          <Trash class="svg mr-3" @click="crudRoutine(routine, 'delete')" title="supprimer"/>
+          <CalendarIcon class="svg" title="reprogrammer" @click="openNewCalendar"/>
+        </div>
+      </li>
+    </ol>
 
     <Transition name="slide-fade">
       <RoutineForm v-if="showRoutineForm" v-model="showRoutineForm" :routineSelected="routineSelected" @create="createNewRoutine" @update="updateRoutine" />
@@ -98,6 +135,8 @@ const deleteRoutine = async () => {
 }
 .done {
   position: relative;
+  // opacity: .6;
+  // text-decoration: line-through;
   &::before {
     content: "";
     width: 0;
@@ -115,6 +154,15 @@ const deleteRoutine = async () => {
   }
   to {
     width: 100%;
+  }
+}
+
+.routine-list {
+  .cta-container {
+    transition: .4s ease;
+  }
+  &:hover .cta-container {
+    opacity: 1;
   }
 }
 

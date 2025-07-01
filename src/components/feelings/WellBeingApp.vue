@@ -10,7 +10,7 @@ import DailyRecurrentRoutine from '@/components/feelings/DailyRecurrentRoutine.v
 import Drawner from '@/components/utils/Drawer.vue'
 import Popin from '@/components/utils/Popin.vue'
 import BackButton from '@/components/utils/BackButton.vue'
-import { useMonthNumber, useCurrentDay, useCurrentDate, useCurrentMonth, useCurrentYear } from '@/composables/useDate'
+import { useMonthNumber, useCurrentDay, useDayNumber, useCurrentDate, useCurrentMonth, useCurrentYear } from '@/composables/useDate'
 import { useDayNoteStore } from '@/stores/dayNoteStore'
 import { Day } from '@/types/Day'
 import { RecurrentRoutine } from '@/types/RecurrentRoutine'
@@ -29,7 +29,6 @@ const currentRoutineLeft = computed((): CurrentRoutine[] => currentRoutinesStore
   }
 })
 )
-// const currentRoutine = computed((): RecurrentRoutine[] => currentRoutinesStore.items)
 
 const store = useDayNoteStore()
 store.loadDayNotes()
@@ -46,6 +45,9 @@ const routeYear = computed(() => route.params.year as string)
 const routeYearNumber = Number(routeYear.value)
 const routeMonthNumber = computed((): number  => useMonthNumber(routeMonth.value))
 const currentDailyRoutineTotal = computed((): number => currentRoutinesStore.items.filter(routine => routine.date === useCurrentDate && routine.month === useCurrentMonth && routine.year === routeYearNumber).length)
+
+// retourne uniquement les routines du mois affiché
+const currentRoutines = computed((): CurrentRoutine[] => currentRoutinesStore.items.filter(routine => routine.month === routeMonthNumber.value && routine.year === routeYearNumber) )
 
 const daySelected = ref<Day>()
 const showPopin = ref<boolean>(false)
@@ -129,18 +131,45 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
         <template v-slot:item="slotProps">
           <!-- <div v-if="(routeMonthNumber < useCurrentMonth || (slotProps.date < useCurrentDate && routeMonthNumber === useCurrentMonth))" class="day_finished right hidden md:block" />
           <div v-if="(routeMonthNumber < useCurrentMonth || (slotProps.date < useCurrentDate && routeMonthNumber === useCurrentMonth))" class="day_finished left hidden md:block" /> -->
-          <div class="day_number-wrapper" @click="showPopinFn(slotProps.date)">
+          <div
+            class="day_number-wrapper"
+            :class=" (
+              routeMonthNumber < useCurrentMonth
+              || (slotProps.date < useCurrentDate
+              && routeMonthNumber === useCurrentMonth)
+            )
+            ? 'text-[#aab0b2] bg-[#ffffff8c]'
+            : 'bg-white'"
+            @click="showPopinFn(slotProps.date)" 
+          >
             <p
               class="day_number"
-              :class="{ 'text-[#aab0b2]': (
-                routeMonthNumber < useCurrentMonth
-                || (slotProps.date < useCurrentDate
-                && routeMonthNumber === useCurrentMonth)
-              )}"
             >
+              <span class="hidden md:inline-block">
+                {{ useDayNumber(slotProps.date, routeMonthNumber, routeYearNumber) }}
+              </span>
               {{ slotProps.date }}
             </p>
+
+            <!-- tâches créées uniquement pour les jours associés -->
+            <div class="has-tasks flex max-w-[100%] absolute bottom-1 md:bottom-3 right-1 overflow-hidden">
+              <div v-for="task in currentRoutines.filter((item) => item.date === slotProps.date )" :key="task.id">
+                <div
+                  class="bg-blue-500 w-1 h-1 md:w-2 md:h-2 rounded-[50%] ml-[1px]"
+                  :class="[
+                    {
+                      'opacity-[0.5]' : (
+                        routeMonthNumber < useCurrentMonth
+                        || (slotProps.date < useCurrentDate && routeMonthNumber === useCurrentMonth)
+                      )
+                    },
+                    { 'bg-red-500' : !task.done }
+                  ]"
+                />
+              </div>
+            </div>
           </div>
+
         </template>
         <template v-slot="slotProps">
           <CalendarMomentsColor :month="routeMonth" :year="routeYearNumber" :date="slotProps.date" />
@@ -178,8 +207,6 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
 
 <style scoped lang="scss">
 .popin-content {
-  // display: flex;
-  // align-items: center;
   width: 100%;
 }
 
@@ -187,27 +214,22 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
   transition: .2s;
 
   &.fade {
-    opacity: .5;
-    // color: #aab0b2; //bdc3c5
+    opacity: .7;
+    color: #aab0b2; //bdc3c5
   }
-
-  // @media (min-width: 960px) {
-  //   margin-right: 290px;
-  // }
 }
 .day_number-wrapper {
   width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
-  margin-right: 5px;
-  margin-top: 5px;
-  position: relative;
+  
+  @media (min-width: 960px) {
+  }
 }
 
 .day_number {
+  width: 100%;
+  padding-right: 5px;
   font-size: 12px;
+  text-align: right;
   position: absolute;
 }
 .day_finished {
