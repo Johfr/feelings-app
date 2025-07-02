@@ -59,17 +59,19 @@ export const useCurrentRoutineStore = defineStore('CurrentRoutine', () => {
 
   const deleteRoutine = async (itemId: string): Promise<{status: number, message: string}> => {
     const index = items.value.findIndex((item): Boolean => item.id === itemId)
+    
+    if (index === -1) return { status: 404, message: 'Routine non trouvée' }
 
-    const resp = await update(items.value[index], 'DELETE')
-
-    // maj faite, on met à jour localement
-    if (resp.status === 200) {
-      items.value.splice(index, 1) 
-    }
+    const resp = await update(items.value[index], 'DELETE')    
 
     return resp
   }
 
+  // utilisé directement dans les composants pour éviter les erreurs liées aux index
+  const removeRoutinesByIds = (ids: string[]) => {
+    items.value = items.value.filter(item => !ids.includes(item.id))
+  }
+  
   return {
     items,
     loading,
@@ -78,5 +80,6 @@ export const useCurrentRoutineStore = defineStore('CurrentRoutine', () => {
     create: createRoutine,
     update: updateRoutine,
     delete: deleteRoutine,
+    removeRoutinesByIds
   }
 })

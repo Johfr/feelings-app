@@ -133,6 +133,15 @@ const deleteRoutine = async (routineSelected: CurrentRoutine) => {
   // }
 }
 
+const deletMultipleRoutine = async (routinesSelected: CurrentRoutine[]) => {
+  const ids = routinesSelected.map(item => item.id)
+  const createPromises = routinesSelected.map(deleteRoutine)
+  await Promise.all(createPromises)
+
+  // retire les items côté front uniquement à la fin des requêtes asynchrones pour éviter un bug au niveau des index du tableau lors de la suppression successive
+  currentRoutinesStore.removeRoutinesByIds(ids)
+}
+
 const pourRecurrentRoutines = async () => {
   // push dans la bdd
   const createPromises = recurrentRoutines.value.map(createNewRoutine)
@@ -142,17 +151,16 @@ const pourRecurrentRoutines = async () => {
 
 <template>
   <section class="content-section" v-if="day">
-    <!-- Titre -->
-    <div class="xl:flex xl:items-center xl:justify-between">
-      <DailyDayName :day="day" @update="updateDailyDate"/>
+    <!-- Entête -->
+    <!-- <div class="xl:flex xl:items-center xl:justify-between"> -->
+    <DailyDayName :day="day" @update="updateDailyDate"/>
 
-      <button @click="showDrawerFn" class="">
-        Tâches du jour
-      </button>
-    </div>
+    <button @click="showDrawerFn" class="">
+      {{ currentRoutines.length }} Tâche(s) aujourd'hui
+    </button>
+    <!-- </div> -->
 
-
-    <!-- Moments de la journée: morning, afternoon, night -->
+    <!-- Moments de la journée colorés: morning, afternoon, night -->
     <div class="mt-10" v-for="(moment, momentIndex) in day.moments" :key="momentIndex">
       <section class="flex items-center cursor-pointer" @click="showFormFn(moment.moment)" title="Modifier">
         <Sunrise v-if="moment.moment === 'morning'" class="moment-svg morning border-1 border-solid border-[moment.color]" :style="{borderColor: moment.color}" />
@@ -191,7 +199,16 @@ const pourRecurrentRoutines = async () => {
     <!-- Drawer daily routine jour -->
     <Teleport to="#app">
       <Drawner v-model="showDrawer">
-        <DailyCurrentRoutine v-if="showDrawer" title="Tâche du :" :routines="currentRoutines" :asCheckBox="true" @create="createNewRoutine" @update="updateRoutine" @confirm="deleteRoutine">
+        <DailyCurrentRoutine
+          v-if="showDrawer"
+          title="Tâche du :"
+          :routines="currentRoutines"
+          :asCheckBox="true"
+          @create="createNewRoutine"
+          @update="updateRoutine"
+          @confirm="deleteRoutine"
+          @confirmMultiple="deletMultipleRoutine"
+        >
           <template #title>
             <h2 class="title-h2">
               <!-- {{ `Tâches du ${useDayNumber(day.date, day.month, Number(day.year))} ${day.date} ${useMonths[day.month]} ${day.year}` }} -->

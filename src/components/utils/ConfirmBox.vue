@@ -40,5 +40,6 @@ const confirm = () => {
   right: 0;
   bottom: 0;
   background-color: #fff;
+  z-index: 4;
 }
 </style>

@@ -171,7 +171,13 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
     </div>
 
     <Drawner v-model="showDrawer">
-      <DailyRecurrentRoutine :title="'Routines récurrentes'" :routines="recurrentRoutines" @create="createNewRoutine" @update="updateRoutine" @confirm="deleteRoutine" />
+      <DailyRecurrentRoutine
+        :title="'Routines récurrentes'"
+        :routines="recurrentRoutines"
+        @create="createNewRoutine"
+        @update="updateRoutine"
+        @confirm="deleteRoutine"
+      />
     </Drawner>
   </div>
 

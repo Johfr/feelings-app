@@ -33,7 +33,7 @@ const GetPreviousNextDate = (direction: string) => {
 </script>
 
 <template>
-  <div class="title-container">
+  <div class="title-container mt-2">
     <span class="previous-button" @click="GetPreviousNextDate('previous')"><</span>
     <h2 class="title-h2">
       {{ useDayNumber(localDate, localMonth, Number(localYear)) }} {{ localDate }} {{ useMonths[localMonth]}} {{ localYear }}

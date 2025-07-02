@@ -4,7 +4,8 @@ import { CurrentRoutine } from '@/types/CurrentRoutine'
 import ConfirmBox from '@/components/utils/ConfirmBox.vue'
 import CalendarIcon from '@/assets/svg/calendar.svg?component'
 import Pencil from '@/assets/svg/pencil.svg?component'
-import Trash from '@/assets/svg/trash.svg?component'
+import TrashIcon from '@/assets/svg/trash.svg?component'
+import CheckIcon from '@/assets/svg/check.svg?component'
 import ArrowIcon from '@/assets/svg/arrow.svg?component'
 import { usePreviousNextDate, useMonthName } from '@/composables/useDate'
 
@@ -14,6 +15,8 @@ const props = defineProps<{
   asCheckBox?: boolean
 }>()
 
+const emit = defineEmits(['create', 'update', 'confirm', 'confirm-multiple'])
+
 // trier par 
 const sortedRoutines = computed(() => {
   return [...props.routines].sort((a, b) => Number(a.done) - Number(b.done))
@@ -21,7 +24,11 @@ const sortedRoutines = computed(() => {
 
 const showRoutineForm = ref<boolean>(false)
 const showRoutineConfirm = ref<boolean>(false)
+const showMultipleRoutineConfirm = ref<boolean>(false)
 const routineSelected = ref<CurrentRoutine>()
+const specificDate = ref<{date : number, month : number, year : number}>({date: null, month: null, year: null})
+const openedDropdownId = ref<string | null>(null)
+const routinesSelected = ref<CurrentRoutine[]>([])
 
 const showRoutineFormFn = (value: boolean = true): void => {
   showRoutineForm.value = value
@@ -31,9 +38,17 @@ const showRoutineConfirmFn = (): void => {
   showRoutineConfirm.value = !showRoutineConfirm.value
 }
 
+const showMultipleRoutineConfirmFn = (): void => {
+  showMultipleRoutineConfirm.value = !showMultipleRoutineConfirm.value
+}
+
 const crudRoutine = (routine: CurrentRoutine, type: string = ''): void => {
   type === 'delete' ? showRoutineConfirmFn() : showRoutineFormFn()
   routineSelected.value = routine
+}
+
+const crudMultipleRoutine = (): void => {
+  showMultipleRoutineConfirmFn()
 }
 
 const toggleDone = (routine: CurrentRoutine) => {
@@ -41,9 +56,18 @@ const toggleDone = (routine: CurrentRoutine) => {
   updateRoutine(routine)
 }
 
-const specificDate = ref<{date : number, month : number, year : number}>({date: null, month: null, year: null})
+const selectMultipleRoutine = (routine: CurrentRoutine): CurrentRoutine[] => {
+  const alreadyExist = routinesSelected.value.filter(item => item.id === routine.id)
 
-const openedDropdownId = ref<string | null>(null)
+  if (alreadyExist.length > 0) {
+    const index = routinesSelected.value.findIndex((item): Boolean => item.id === routine.id)
+    routinesSelected.value.splice(index, 1) 
+  } else {
+    routinesSelected.value.push(routine)
+  }
+  
+  return routinesSelected.value
+}
 
 const toggleDropdown = () => {
   openedDropdownId.value = null
@@ -89,8 +113,6 @@ const openDropdown = (id: string) => {
   openedDropdownId.value = (openedDropdownId.value === id) ? null : id
 }
 
-const emit = defineEmits(['create', 'update', 'confirm'])
-
 // CRUD RECURRENT STORE
 const createNewRoutine = async (newRoutine: string) => {
   emit('create', {...routineSelected.value, title: newRoutine})
@@ -107,6 +129,11 @@ const deleteRoutine = async () => {
   showRoutineConfirmFn()
 }
 
+const deletMultipleRoutine = async () => {  
+  emit('confirm-multiple', routinesSelected.value)
+  routinesSelected.value = []
+  showMultipleRoutineConfirmFn()
+}
 </script>
 
 <template>
@@ -121,6 +148,11 @@ const deleteRoutine = async () => {
       Ajouter une tâche
     </button>
 
+    <button v-show="routinesSelected.length > 0" type="button" @click="crudMultipleRoutine">
+      Supprimer {{ routinesSelected.length }} tâches
+      <TrashIcon class="svg mr-3" @click="" title="supprimer"/>
+    </button>
+
     <Transition name="slide-fade">
       <ol class="list-decimal" v-if="sortedRoutines.length > 0">
         <li
@@ -128,8 +160,16 @@ const deleteRoutine = async () => {
           :key="routine.id"
           class="routine-list flex flex-wrap justify-between flex-col py-3 cursor-context-menu relative"
         >
-          <!-- <input v-if="asCheckBox" :id="routine.id" type="checkbox" class="w-4 h-4 mr-3" v-model="routine.done" @input="toggleDone(routine)"> -->
           <div class="flex items-baseline">
+            <input
+              v-if="asCheckBox"
+              :id="routine.id"
+              type="checkbox"
+              class="routine-checkbox min-w-4 min-h-4 mr-3"
+              :class="{ '--show-checkbox' : routinesSelected.length > 0}"
+              @input="selectMultipleRoutine(routine)"
+            >
+
             <!-- pastille  bleue -->
             <div
               v-if="asCheckBox"
@@ -147,8 +187,9 @@ const deleteRoutine = async () => {
           </div>
 
           <div class="cta-container flex items-center justify-end md:opacity-0">
+            <CheckIcon class="svg mr-3" :class="{ 'fill-indigo-600': routine.done }" @click="toggleDone(routine)" title="Done"/>
             <Pencil class="svg mr-3" @click="crudRoutine(routine)" title="modifier"/>
-            <Trash class="svg mr-3" @click="crudRoutine(routine, 'delete')" title="supprimer"/>
+            <TrashIcon class="svg mr-3" @click="crudRoutine(routine, 'delete')" title="supprimer"/>
             <CalendarIcon class="svg" title="reprogrammer" @click="openDropdown(routine.id)"/>
           </div>
           
@@ -189,6 +230,10 @@ const deleteRoutine = async () => {
     <Transition name="slide-fade">
       <ConfirmBox v-if="showRoutineConfirm" v-model="showRoutineConfirm" @confirm="deleteRoutine" />
     </Transition>
+
+    <Transition name="slide-fade">
+      <ConfirmBox v-if="showMultipleRoutineConfirm" v-model="showMultipleRoutineConfirm" @confirm="deletMultipleRoutine" />
+    </Transition>
   </section>
 </template>
 
@@ -225,7 +270,15 @@ const deleteRoutine = async () => {
     transition: .4s ease;
     z-index: 4;
   }
-  &:hover .cta-container {
+  &:hover .cta-container, &:hover .routine-checkbox {
+    opacity: 1;
+  }
+}
+.routine-checkbox {
+  opacity: 0;
+  transition: .4s;
+
+  &.--show-checkbox {
     opacity: 1;
   }
 }
