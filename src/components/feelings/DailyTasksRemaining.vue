@@ -1,12 +1,26 @@
 <script setup lang="ts">
-import { useCurrentDate, useCurrentMonth, useCurrentYear } from '@/composables/useDate'
+import { useCurrentDate, useCurrentMonth, useMonthName, useCurrentYear } from '@/composables/useDate'
 import { useCurrentRoutineStore } from '@/stores/currentRoutineStore'
 import { CurrentRoutine } from '@/types/CurrentRoutine'
+
+const props = defineProps<{
+  actifMonth: string,
+  actifMonthNumber: number,
+  actifYear: number
+}>()
 
 const emit = defineEmits(['openpopin'])
 
 const currentRoutinesStore = useCurrentRoutineStore()
 currentRoutinesStore.loadRoutines()
+
+const totalMonthlyRoutines = computed((): CurrentRoutine[] => currentRoutinesStore.items.filter(routine => {
+  return routine.month === props.actifMonthNumber && routine.year === props.actifYear
+}))
+
+const totalMonthlyRoutinesDone = computed((): CurrentRoutine[] => currentRoutinesStore.items.filter(routine => {
+  return routine.month === props.actifMonthNumber && routine.year === props.actifYear && routine.done
+}))
 
 const currentRoutineLeft = computed((): CurrentRoutine[] => currentRoutinesStore.items.filter(routine => {
   if (routine.date === useCurrentDate && routine.month === useCurrentMonth && routine.year === useCurrentYear) {
@@ -36,10 +50,15 @@ const openPopin = ():void => {
     <p v-if="currentRoutineLeft.length === 0" class="text-indigo-400">
       Félicitation ! Tu as réalisé toutes tes tâches de ta journée. Tu peux être fier de toi !
     </p>
-    
+
     <p v-else class="text-indigo-400">
-      {{ currentRoutineLeft.length }} tâches restantes pour aujourd'hui. Tu peux le faire 💪
+      {{ currentRoutineLeft.length }} tâches restantes pour aujourd'hui ( {{ useCurrentDate }} {{ useMonthName(useCurrentMonth) }} {{ useCurrentYear }} ). Tu peux le faire 💪
     </p>
+    
+    <p>
+      <span class="font-bold">{{ totalMonthlyRoutinesDone.length }}</span>/{{ totalMonthlyRoutines.length }} tâches réalisées ce mois-ci ({{ actifMonth }})
+    </p>
+
   </div>
 </template>
 

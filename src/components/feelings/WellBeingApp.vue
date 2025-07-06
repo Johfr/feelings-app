@@ -1,23 +1,23 @@
 <script setup lang="ts">
 import CalendarMonthsTotalDays from '@/components/feelings/CalendarMonthsTotalDays.vue'
+import DailyRecurrentRoutine from '@/components/feelings/DailyRecurrentRoutine.vue'
 import CalendarMomentsColor from '@/components/feelings/CalendarMomentsColor.vue'
 import MonthTendence from '@/components/feelings/MonthTendence.vue'
 import ColorsMeaning from '@/components/feelings/ColorsMeaning.vue'
 import DailyMoments from '@/components/feelings/DailyMoments.vue'
 import MonthGoal from '@/components/feelings/MonthGoal.vue'
 import MonthName from '@/components/feelings/MonthName.vue'
-import DailyRecurrentRoutine from '@/components/feelings/DailyRecurrentRoutine.vue'
+import BackButton from '@/components/utils/BackButton.vue'
 import Drawner from '@/components/utils/Drawer.vue'
 // import Popin from '@/components/utils/Popin.vue'
-import BackButton from '@/components/utils/BackButton.vue'
 import { useMonthName, useMonthNumber, useCurrentDay, useDayNumber, useCurrentDate, useCurrentMonth, useCurrentYear } from '@/composables/useDate'
-import { useDayNoteStore } from '@/stores/dayNoteStore'
-import { Day } from '@/types/Day'
-import { RecurrentRoutine } from '@/types/RecurrentRoutine'
 import { useRecurrentRoutineStore } from '@/stores/recurrentRoutineStore'
 import { useCurrentRoutineStore } from '@/stores/currentRoutineStore'
-import { CurrentRoutine } from '@/types/CurrentRoutine'
+import { useDayNoteStore } from '@/stores/dayNoteStore'
+import { RecurrentRoutine } from '@/types/RecurrentRoutine'
 import DailyTasksRemaining from './DailyTasksRemaining.vue'
+import { CurrentRoutine } from '@/types/CurrentRoutine'
+import { Day } from '@/types/Day'
 
 const currentRoutinesStore = useCurrentRoutineStore()
 currentRoutinesStore.loadRoutines()
@@ -109,7 +109,7 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
     <MonthName :routeMonth="routeMonth" :routeYear="routeYearNumber" />
 
     <!-- Tâches restantes  -->
-    <DailyTasksRemaining @openpopin="openPopin"/>
+    <DailyTasksRemaining :actifMonth="routeMonth" :actifMonthNumber="routeMonthNumber" :actifYear="routeYearNumber" @openpopin="openPopin"/>
 
     <MonthTendence :month="routeMonth" :year="routeYearNumber" />
 

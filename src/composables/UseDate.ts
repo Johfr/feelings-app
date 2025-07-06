@@ -1,6 +1,3 @@
-import { DayNote } from "@/types/DayNote"
-import { ref } from "vue"
-
 const date = new Date()
 
 export const useMonths = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]

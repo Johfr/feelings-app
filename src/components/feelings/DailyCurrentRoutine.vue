@@ -19,6 +19,7 @@ const emit = defineEmits(['create', 'update', 'confirm', 'confirm-multiple'])
 
 // trier par 
 const sortedRoutines = computed(() => {
+  resetRoutinesSelected() // supprime la donnée au passage d'une date à l'autre
   return [...props.routines].sort((a, b) => Number(a.done) - Number(b.done))
 })
 
@@ -29,6 +30,10 @@ const routineSelected = ref<CurrentRoutine>()
 const specificDate = ref<{date : number, month : number, year : number}>({date: null, month: null, year: null})
 const openedDropdownId = ref<string | null>(null)
 const routinesSelected = ref<CurrentRoutine[]>([])
+
+const resetRoutinesSelected = () => {
+  routinesSelected.value = []
+}
 
 const showRoutineFormFn = (value: boolean = true): void => {
   showRoutineForm.value = value
@@ -131,8 +136,8 @@ const deleteRoutine = async () => {
 
 const deletMultipleRoutine = async () => {  
   emit('confirm-multiple', routinesSelected.value)
-  routinesSelected.value = []
   showMultipleRoutineConfirmFn()
+  resetRoutinesSelected
 }
 </script>
 
@@ -153,6 +158,7 @@ const deletMultipleRoutine = async () => {
       <TrashIcon class="svg mr-3" @click="" title="supprimer"/>
     </button>
 
+    <!-- Tasks list -->
     <Transition name="slide-fade">
       <ol class="list-decimal" v-if="sortedRoutines.length > 0">
         <li
@@ -160,7 +166,7 @@ const deletMultipleRoutine = async () => {
           :key="routine.id"
           class="routine-list flex flex-wrap justify-between flex-col py-3 cursor-context-menu relative"
         >
-          <div class="flex items-baseline">
+          <div class="flex items-center">
             <input
               v-if="asCheckBox"
               :id="routine.id"
@@ -178,9 +184,13 @@ const deletMultipleRoutine = async () => {
             />
 
             <p
-              :class="{'done': routine.done}"
-              @click="toggleDone(routine)"
-              title="cliquer pour valider"
+              class="cursor-pointer"
+              :class="{
+                'done': (routine.done && routine.title.split('').length <= 50),
+                'line-through decoration-black': (routine.done && routine.title.split('').length > 50)
+              }"
+              @click="crudRoutine(routine)"
+              title="cliquer pour Modifier"
             >
               {{ routine.title }}
             </p>
@@ -224,7 +234,14 @@ const deletMultipleRoutine = async () => {
     </Transition>
 
     <Transition name="slide-fade">
-      <RoutineForm v-if="showRoutineForm" v-model="showRoutineForm" title="Mettre à jour une tâche" :routineSelected="routineSelected" @create="createNewRoutine" @update="updateRoutine" />
+      <RoutineForm
+        v-if="showRoutineForm"
+        v-model="showRoutineForm"
+        title="Mettre à jour une tâche"
+        :routineSelected="routineSelected"
+        @create="createNewRoutine"
+        @update="updateRoutine"
+      />
     </Transition>
 
     <Transition name="slide-fade">
@@ -275,8 +292,11 @@ const deletMultipleRoutine = async () => {
   }
 }
 .routine-checkbox {
-  opacity: 0;
   transition: .4s;
+  // align-self: center;
+  @media (min-width: 1024px) {
+    opacity: 0;
+  }
 
   &.--show-checkbox {
     opacity: 1;

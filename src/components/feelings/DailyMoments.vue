@@ -156,7 +156,7 @@ const pourRecurrentRoutines = async () => {
     <DailyDayName :day="day" @update="updateDailyDate"/>
 
     <button @click="showDrawerFn" class="">
-      {{ currentRoutines.length }} Tâche(s) aujourd'hui
+      {{ currentRoutines.length }} Tâche(s) pour ce jour
     </button>
     <!-- </div> -->
 
