@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { usePreviousNextDate } from '@/composables/useDate'
-import { DayNote } from '@/types/DayNote'
+// import { DayNote } from '@/types/DayNote'
+import { Day } from '@/types/Day'
 import { useMonths, useMonthName, useDayNumber } from '@/composables/useDate'
 
 const props = defineProps<{
-  day: DayNote
+  daySelected: Day
 }>()
 
 const router = useRouter()
@@ -13,9 +14,9 @@ const emit = defineEmits(['update'])
 // const routerPush = (routeName: string, params: {year: number, month: number, date: number}) => router.push({ name: routeName, params })
 const routerPush = (routeName: string, year: number, month: string, date: number) => router.push({ name: routeName, params: { year, month, date } })
 
-const localDate = ref<number>(props.day.date)
-const localMonth = ref<number>(props.day.month)
-const localYear = ref<number>(props.day.year)
+const localDate = ref<number>(props.daySelected.date)
+const localMonth = ref<number>(props.daySelected.month)
+const localYear = ref<number>(props.daySelected.year)
 
 const GetPreviousNextDate = (direction: string) => {
   const dateUpdated = usePreviousNextDate( localDate.value, localMonth.value, localYear.value, direction)

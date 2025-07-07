@@ -8,14 +8,26 @@ import TrashIcon from '@/assets/svg/trash.svg?component'
 import CheckIcon from '@/assets/svg/check.svg?component'
 import ArrowIcon from '@/assets/svg/arrow.svg?component'
 import { usePreviousNextDate, useMonthName } from '@/composables/useDate'
+import { useCurrentRoutineStore } from '@/stores/currentRoutineStore'
+import { useRecurrentRoutineStore } from '@/stores/recurrentRoutineStore'
+import { Day } from '@/types/Day'
+import { RecurrentRoutine } from '@/types/RecurrentRoutine'
+
+const currentRoutinesStore = useCurrentRoutineStore()
+currentRoutinesStore.loadRoutines()
+
+const recurrentRoutinesStore = useRecurrentRoutineStore()
+recurrentRoutinesStore.loadRoutines()
+const recurrentRoutines = computed((): RecurrentRoutine[] => recurrentRoutinesStore.items)
 
 const props = defineProps<{
   routines: CurrentRoutine[],
+  daySelected: Day,
   title?: string,
   asCheckBox?: boolean
 }>()
 
-const emit = defineEmits(['create', 'update', 'confirm', 'confirm-multiple'])
+// const emit = defineEmits(['create', 'update', 'confirm', 'confirm-multiple'])
 
 // trier par 
 const sortedRoutines = computed(() => {
@@ -50,10 +62,6 @@ const showMultipleRoutineConfirmFn = (): void => {
 const crudRoutine = (routine: CurrentRoutine, type: string = ''): void => {
   type === 'delete' ? showRoutineConfirmFn() : showRoutineFormFn()
   routineSelected.value = routine
-}
-
-const crudMultipleRoutine = (): void => {
-  showMultipleRoutineConfirmFn()
 }
 
 const toggleDone = (routine: CurrentRoutine) => {
@@ -119,25 +127,59 @@ const openDropdown = (id: string) => {
 }
 
 // CRUD RECURRENT STORE
-const createNewRoutine = async (newRoutine: string) => {
-  emit('create', {...routineSelected.value, title: newRoutine})
+const createNewTitle = async (title: string) => {
+  routineSelected.value.title = title
+
+  createNewRoutine(routineSelected.value)
+}
+
+const createNewRoutine = async (routine: CurrentRoutine) => {
+  
+  routine.date = props.daySelected.date
+  routine.month = props.daySelected.month
+  routine.year = Number(props.daySelected.year)
+  routine.type = routine.type ?? 'current'
+
+  const resp = await currentRoutinesStore.create(routine)
+
+  // if (resp.status === 201) {
+  //   toaster('ok')
+  // }
 }
 
 const updateRoutine = async (routine: CurrentRoutine) => {
-  emit('update', routine)
+  const resp = await currentRoutinesStore.update(routine)
+
   toggleDropdown()
   resetDateForm()
 }
 
-const deleteRoutine = async () => {
-  emit('confirm', routineSelected.value)
+const deleteRoutine = async (routineSelected: CurrentRoutine) => {
+  const resp = await currentRoutinesStore.delete(routineSelected.id)
+  currentRoutinesStore.removeRoutinesByIds([routineSelected.id])
   showRoutineConfirmFn()
 }
 
-const deletMultipleRoutine = async () => {  
-  emit('confirm-multiple', routinesSelected.value)
+const deletMultipleRoutine = async () => {
+  const ids = routinesSelected.value.map(item => item.id)
+  const createPromises = routinesSelected.value.map(deleteRoutine)
+  await Promise.all(createPromises)
+
+  // retire les items côté front uniquement à la fin des requêtes asynchrones pour éviter un bug au niveau des index du tableau lors de la suppression successive
+  currentRoutinesStore.removeRoutinesByIds(ids)
+
+  // fixer ça en passant un type="multiple" à la confirm par ex
+  // les 2 fonctions
   showMultipleRoutineConfirmFn()
-  resetRoutinesSelected
+  showRoutineConfirmFn()
+  resetRoutinesSelected()
+}
+
+
+const pourRecurrentRoutines = async () => {
+  // push dans la bdd
+  const createPromises = recurrentRoutines.value.map(createNewRoutine)
+  const results = await Promise.all(createPromises)
 }
 </script>
 
@@ -148,12 +190,13 @@ const deletMultipleRoutine = async () => {
     <slot name="title"></slot>
     
     <slot name="cta"></slot>
+    <button @click="pourRecurrentRoutines">Importer les routines récurrentes</button>
 
     <button type="button" @click="crudRoutine({ id: null, date: null, month: null, year: null, title: null, done: null, type: null })">
       Ajouter une tâche
     </button>
 
-    <button v-show="routinesSelected.length > 0" type="button" @click="crudMultipleRoutine">
+    <button v-show="routinesSelected.length > 0" type="button" @click="showMultipleRoutineConfirmFn">
       Supprimer {{ routinesSelected.length }} tâches
       <TrashIcon class="svg mr-3" @click="" title="supprimer"/>
     </button>
@@ -239,17 +282,17 @@ const deletMultipleRoutine = async () => {
         v-model="showRoutineForm"
         title="Mettre à jour une tâche"
         :routineSelected="routineSelected"
-        @create="createNewRoutine"
+        @create="createNewTitle"
         @update="updateRoutine"
       />
     </Transition>
 
     <Transition name="slide-fade">
-      <ConfirmBox v-if="showRoutineConfirm" v-model="showRoutineConfirm" @confirm="deleteRoutine" />
+      <ConfirmBox v-if="showRoutineConfirm" v-model="showRoutineConfirm" @confirm="deleteRoutine(routineSelected)" />
     </Transition>
 
     <Transition name="slide-fade">
-      <ConfirmBox v-if="showMultipleRoutineConfirm" v-model="showMultipleRoutineConfirm" @confirm="deletMultipleRoutine" />
+      <ConfirmBox title="Confirmer la suppression définitive multiple ?" v-if="showMultipleRoutineConfirm" v-model="showMultipleRoutineConfirm" @confirm="deletMultipleRoutine" />
     </Transition>
   </section>
 </template>
