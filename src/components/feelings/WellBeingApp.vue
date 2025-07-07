@@ -2,8 +2,10 @@
 import CalendarMonthsTotalDays from '@/components/feelings/CalendarMonthsTotalDays.vue'
 import DailyRecurrentRoutine from '@/components/feelings/DailyRecurrentRoutine.vue'
 import CalendarMomentsColor from '@/components/feelings/CalendarMomentsColor.vue'
+import DailyCurrentRoutine from '@/components/feelings/DailyCurrentRoutine.vue'
 import MonthTendence from '@/components/feelings/MonthTendence.vue'
 import ColorsMeaning from '@/components/feelings/ColorsMeaning.vue'
+import DailyDayName from '@/components/feelings/DailyDayName.vue'
 import DailyMoments from '@/components/feelings/DailyMoments.vue'
 import MonthGoal from '@/components/feelings/MonthGoal.vue'
 import MonthName from '@/components/feelings/MonthName.vue'
@@ -17,6 +19,7 @@ import { useDayNoteStore } from '@/stores/dayNoteStore'
 import { RecurrentRoutine } from '@/types/RecurrentRoutine'
 import DailyTasksRemaining from './DailyTasksRemaining.vue'
 import { CurrentRoutine } from '@/types/CurrentRoutine'
+import { DayNote } from '@/types/DayNote'
 import { Day } from '@/types/Day'
 
 const currentRoutinesStore = useCurrentRoutineStore()
@@ -28,9 +31,14 @@ const recurrentRoutines = computed((): RecurrentRoutine[] => recurrentRoutinesSt
 const noteStore = useDayNoteStore()
 noteStore.loadDayNotes()
 
-const showDrawer = ref<boolean>(false)
-const showDrawerFn = () => {
-  showDrawer.value = !showDrawer.value
+const showRecurrentDrawer = ref<boolean>(false)
+const showRecurrentDrawerFn = () => {
+  showRecurrentDrawer.value = !showRecurrentDrawer.value
+}
+
+const showCurrentDrawer = ref<boolean>(false)
+const showCurrentDrawerFn = () => {
+  showCurrentDrawer.value = !showCurrentDrawer.value
 }
 
 const route = useRoute()
@@ -41,7 +49,8 @@ const routeYear = computed(() => route.params.year as string)
 const routeYearNumber = computed(() => Number(routeYear.value))
 
 // retourne uniquement les routines du mois affiché
-const currentRoutines = computed((): CurrentRoutine[] => currentRoutinesStore.items.filter(routine => routine.month === routeMonthNumber.value && routine.year === routeYearNumber.value) )
+const currentMonthlyRoutines = computed((): CurrentRoutine[] => currentRoutinesStore.items.filter(routine => routine.month === routeMonthNumber.value && routine.year === routeYearNumber.value) )
+const currentDailyRoutines = computed((): CurrentRoutine[] => currentRoutinesStore.items.filter(routine => routine.date === daySelected.value.date && routine.month === routeMonthNumber.value && routine.year === routeYearNumber.value) )
 
 const daySelected = ref<Day>()
 const showPopin = ref<boolean>(false)
@@ -60,6 +69,20 @@ const openPopin = (date: number, month: number, year: number):void => {
     date,
     month,
     year
+  }
+}
+
+const openCurrentRoutine = (date: number, month: number, year: number):void => {
+  showCurrentDrawerFn()
+  updateDailyDate({ date, month, year })
+}
+
+const updateDailyDate = async (dateUpdated: { date: number, month: number, year: number }) => {
+  daySelected.value = {
+    id: null,
+    date: dateUpdated.date,
+    month: dateUpdated.month,
+    year: dateUpdated.year
   }
 }
 
@@ -102,14 +125,14 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
   <!-- Passer les routines done en fin de liste -->
    <div class="month-container" :class="{fade : showPopin}">
     <BackButton routeName="year" :btnText="'Retour'" />
-    <button @click="showDrawerFn" class="">
+    <button @click="showRecurrentDrawerFn" class="">
       Créer des tâches récurrentes
     </button>
     
     <MonthName :routeMonth="routeMonth" :routeYear="routeYearNumber" />
 
     <!-- Tâches restantes  -->
-    <DailyTasksRemaining :actifMonth="routeMonth" :actifMonthNumber="routeMonthNumber" :actifYear="routeYearNumber" @openpopin="openPopin"/>
+    <DailyTasksRemaining :actifMonth="routeMonth" :actifMonthNumber="routeMonthNumber" :actifYear="routeYearNumber" @openpopin="openCurrentRoutine"/>
 
     <MonthTendence :month="routeMonth" :year="routeYearNumber" />
 
@@ -144,7 +167,7 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
 
             <!-- affichage des tâches créées uniquement pour les jours associés -->
             <div class="has-tasks flex max-w-[100%] right-0 absolute bottom-1 lg:bottom-3 lg:right-1 overflow-hidden">
-              <div v-for="task in currentRoutines.filter((item) => item.date === slotProps.date )" :key="task.id">
+              <div v-for="task in currentMonthlyRoutines.filter((item) => item.date === slotProps.date )" :key="task.id">
                 <div
                   class="bg-blue-500 w-1 h-1 lg:w-2 lg:h-2 rounded-[50%] ml-[1px]"
                   :class="[
@@ -170,7 +193,7 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
       <ColorsMeaning />
     </div>
 
-    <Drawner v-model="showDrawer">
+    <Drawner v-model="showRecurrentDrawer">
       <DailyRecurrentRoutine
         :title="'Routines récurrentes'"
         :routines="recurrentRoutines"
@@ -195,6 +218,25 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
       <div class="popin-content">
         <DailyMoments v-if="showPopin" :daySelected="daySelected"/>
       </div>
+    </Drawner>
+  </Teleport>
+  
+  <!-- Current Routines -->
+  <Teleport to="#app">
+    <Drawner v-model="showCurrentDrawer">
+      <DailyCurrentRoutine
+        v-if="showCurrentDrawer"
+        title="Tâche du :"
+        :daySelected="daySelected"
+        :routines="currentDailyRoutines"
+        :asCheckBox="true"
+        >
+        <template #title>
+          <h2 class="title-h2">
+            <DailyDayName :daySelected="daySelected" @update="updateDailyDate"/>
+          </h2>
+        </template>
+      </DailyCurrentRoutine>
     </Drawner>
   </Teleport>
 </template>

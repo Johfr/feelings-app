@@ -12,7 +12,7 @@ yearsCalendar()
 </script>
 
 <template>
-  <h1 class="title-h1">Journal du capitaine !</h1>
+  <h1 class="title-h1">Journal du capitaine ! 21 days</h1>
    <p>
     Choisir une année :
    </p>

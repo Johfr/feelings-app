@@ -1,4 +1,9 @@
 <script setup lang="ts">
+
+defineProps<{
+  title?: string
+}>()
+
 const emit = defineEmits(['confirm'])
 
 const showConfirm = defineModel()
@@ -16,7 +21,7 @@ const confirm = () => {
   <section class="confirm-box">
     <div class="flex items-center justify-between">
       <h3 class="title-h3 mb-5">
-        Confirmer la suppression définitive ?
+        {{ title || 'Confirmer la suppression définitive ?' }}
       </h3>
     </div>
 
