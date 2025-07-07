@@ -98,7 +98,7 @@ const showDrawerFn = () => {
 <template>
   <section class="content-section" v-if="dayNote">
     <!-- Entête -->
-    <DailyDayName :daySelected="dayNote" @update="updateDailyDate"/>
+    <DailyDayName :daySelected="dateSelected" @update="updateDailyDate"/>
 
     <button @click="showDrawerFn" class="">
       {{ currentRoutines.length }} Tâche(s) pour ce jour
@@ -145,13 +145,13 @@ const showDrawerFn = () => {
         <DailyCurrentRoutine
           v-if="showDrawer"
           title="Tâche du :"
-          :daySelected="daySelected"
+          :daySelected="dateSelected"
           :routines="currentRoutines"
           :asCheckBox="true"
           >
           <template #title>
             <h2 class="title-h2">
-              <DailyDayName :daySelected="daySelected" @update="updateDailyDate"/>
+              <DailyDayName :daySelected="dateSelected" @update="updateDailyDate"/>
             </h2>
           </template>
         </DailyCurrentRoutine>

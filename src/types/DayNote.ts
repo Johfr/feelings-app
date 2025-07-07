@@ -1,9 +1,11 @@
 // DayNote interface
-import { DayMoments } from "./DayMoments" 
+import { Day } from "./Day"
+import { DayMoments } from "./DayMoments"
+
 export interface DayNote {
-  id: string,
-  date:number,
-  month: number,
-  year: number,
+  id: Day["id"],
+  date: Day["date"],
+  month: Day["month"],
+  year: Day["year"],
   moments: DayMoments[]
 }

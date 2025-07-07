@@ -29,8 +29,15 @@ const GetPreviousNextDate = (direction: string) => {
   
   routerPush('date', dateUpdated.year, monthUpdated, dateUpdated.date)  
   emit('update', dateUpdated)
-
 }
+
+watch(props, (newVal) => {
+  localDate.value = newVal.daySelected.date
+  localMonth.value = newVal.daySelected.month
+  localYear.value = newVal.daySelected.year
+}, {
+  immediate: true
+})
 </script>
 
 <template>
