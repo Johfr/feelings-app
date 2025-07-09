@@ -1,17 +1,18 @@
 <script setup lang="ts">
+import { usePreviousNextDate, useMonthName } from '@/composables/useDate'
+import DailyDropdownDueDate from '@/components/feelings/DailyDropdownDueDate.vue'
 import RoutineForm from '@/components/utils/RoutineForm.vue'
-import { CurrentRoutine } from '@/types/CurrentRoutine'
 import ConfirmBox from '@/components/utils/ConfirmBox.vue'
+import { useRecurrentRoutineStore } from '@/stores/recurrentRoutineStore'
+import { useCurrentRoutineStore } from '@/stores/currentRoutineStore'
+import { RecurrentRoutine } from '@/types/RecurrentRoutine'
+import { CurrentRoutine } from '@/types/CurrentRoutine'
+import { Day } from '@/types/Day'
 import CalendarIcon from '@/assets/svg/calendar.svg?component'
 import Pencil from '@/assets/svg/pencil.svg?component'
 import TrashIcon from '@/assets/svg/trash.svg?component'
 import CheckIcon from '@/assets/svg/check.svg?component'
 import ArrowIcon from '@/assets/svg/arrow.svg?component'
-import { usePreviousNextDate, useMonthName } from '@/composables/useDate'
-import { useCurrentRoutineStore } from '@/stores/currentRoutineStore'
-import { useRecurrentRoutineStore } from '@/stores/recurrentRoutineStore'
-import { Day } from '@/types/Day'
-import { RecurrentRoutine } from '@/types/RecurrentRoutine'
 
 const currentRoutinesStore = useCurrentRoutineStore()
 currentRoutinesStore.loadRoutines()
@@ -27,8 +28,6 @@ const props = defineProps<{
   asCheckBox?: boolean
 }>()
 
-// const emit = defineEmits(['create', 'update', 'confirm', 'confirm-multiple'])
-
 // trier par 
 const sortedRoutines = computed(() => {
   resetRoutinesSelected() // supprime la donnée au passage d'une date à l'autre
@@ -42,31 +41,48 @@ const routineSelected = ref<CurrentRoutine>()
 const specificDate = ref<{date : number, month : number, year : number}>({date: null, month: null, year: null})
 const openedDropdownId = ref<string | null>(null)
 const routinesSelected = ref<CurrentRoutine[]>([])
+const showMultipleDropdown = ref<boolean>(false)
 
-const resetRoutinesSelected = () => {
-  routinesSelected.value = []
-}
-
-const showRoutineFormFn = (value: boolean = true): void => {
+const toggleShowRoutineForm = (value: boolean = true): void => {
   showRoutineForm.value = value
 }
 
-const showRoutineConfirmFn = (): void => {
+const toggleShowRoutineConfirm = (): void => {
   showRoutineConfirm.value = !showRoutineConfirm.value
 }
 
-const showMultipleRoutineConfirmFn = (): void => {
+const toggleShowMultipleRoutineConfirm = (): void => {
   showMultipleRoutineConfirm.value = !showMultipleRoutineConfirm.value
-}
-
-const crudRoutine = (routine: CurrentRoutine, type: string = ''): void => {
-  type === 'delete' ? showRoutineConfirmFn() : showRoutineFormFn()
-  routineSelected.value = routine
 }
 
 const toggleDone = (routine: CurrentRoutine) => {
   routine.done = !routine.done
   updateRoutine(routine)
+}
+
+const toggleDropdown = () => {
+  openedDropdownId.value = null
+}
+
+const openDropdown = (id: string) => {
+  openedDropdownId.value = (openedDropdownId.value === id) ? null : id
+}
+
+const resetRoutinesSelected = () => {
+  routinesSelected.value = []
+}
+
+const resetDateForm = () => {
+  resetRoutinesSelected()
+  showMultipleDropdown.value = false
+  specificDate.value.date = null
+  specificDate.value.month = null
+  specificDate.value.year = null
+}
+
+const crudRoutine = (routine: CurrentRoutine, type: string = ''): void => {
+  type === 'delete' ? toggleShowRoutineConfirm() : toggleShowRoutineForm()
+  routineSelected.value = routine
 }
 
 const selectMultipleRoutine = (routine: CurrentRoutine): CurrentRoutine[] => {
@@ -80,16 +96,6 @@ const selectMultipleRoutine = (routine: CurrentRoutine): CurrentRoutine[] => {
   }
   
   return routinesSelected.value
-}
-
-const toggleDropdown = () => {
-  openedDropdownId.value = null
-}
-
-const resetDateForm = () => {
-  specificDate.value.date = null
-  specificDate.value.month = null
-  specificDate.value.year = null
 }
 
 const formatDate = (event: Event) => {
@@ -122,19 +128,18 @@ const updateRoutineDate = (routine: CurrentRoutine, direction: string) => {
   updateRoutine(routine)
 }
 
-const openDropdown = (id: string) => {
-  openedDropdownId.value = (openedDropdownId.value === id) ? null : id
+const updateMultipleRoutineDate = async (direction: string) => {
+  const createPromises = routinesSelected.value.map(routine => updateRoutineDate(routine, direction))
+  const results = await Promise.all(createPromises)
 }
 
 // CRUD RECURRENT STORE
 const createNewTitle = async (title: string) => {
   routineSelected.value.title = title
-
   createNewRoutine(routineSelected.value)
 }
 
 const createNewRoutine = async (routine: CurrentRoutine) => {
-  
   routine.date = props.daySelected.date
   routine.month = props.daySelected.month
   routine.year = Number(props.daySelected.year)
@@ -157,7 +162,7 @@ const updateRoutine = async (routine: CurrentRoutine) => {
 const deleteRoutine = async (routineSelected: CurrentRoutine) => {
   const resp = await currentRoutinesStore.delete(routineSelected.id)
   currentRoutinesStore.removeRoutinesByIds([routineSelected.id])
-  showRoutineConfirmFn()
+  resetDateForm()
 }
 
 const deletMultipleRoutine = async () => {
@@ -165,16 +170,11 @@ const deletMultipleRoutine = async () => {
   const createPromises = routinesSelected.value.map(deleteRoutine)
   await Promise.all(createPromises)
 
-  // retire les items côté front uniquement à la fin des requêtes asynchrones pour éviter un bug au niveau des index du tableau lors de la suppression successive
+  // retire les items côté front (store) uniquement à la fin des requêtes asynchrones pour éviter un bug au niveau des index du tableau lors de la suppression successive
   currentRoutinesStore.removeRoutinesByIds(ids)
 
-  // fixer ça en passant un type="multiple" à la confirm par ex
-  // les 2 fonctions
-  showMultipleRoutineConfirmFn()
-  showRoutineConfirmFn()
   resetRoutinesSelected()
 }
-
 
 const pourRecurrentRoutines = async () => {
   // push dans la bdd
@@ -196,10 +196,19 @@ const pourRecurrentRoutines = async () => {
       Ajouter une tâche
     </button>
 
-    <button v-show="routinesSelected.length > 0" type="button" @click="showMultipleRoutineConfirmFn">
-      Supprimer {{ routinesSelected.length }} tâches
+    <button v-show="routinesSelected.length > 0" type="button" @click="toggleShowMultipleRoutineConfirm">
+      Supprimer {{ routinesSelected.length }} tâche(s)
       <TrashIcon class="svg mr-3" @click="" title="supprimer"/>
     </button>
+
+    <DailyDropdownDueDate
+      :routinesSelected="routinesSelected"
+      :specificDate="specificDate"
+      v-model="showMultipleDropdown"
+      :onUpdate="updateMultipleRoutineDate"
+      :onCancel="resetDateForm"
+      @formatDate="formatDate"
+    />
 
     <!-- Tasks list -->
     <Transition name="slide-fade">
@@ -252,8 +261,9 @@ const pourRecurrentRoutines = async () => {
             <button type="button" class="w-[100%] text-left my-1" @click="updateRoutineDate(routine, 'nextDay')">Demain</button>
             <button type="button" class="w-[100%] text-left my-1" @click="updateRoutineDate(routine, 'twoNextDay')">Après demain</button>
 
+            <!-- Bouton icon calendrier -->
             <form>
-              <label for="date-picker" class="button block w-[100%] relative">
+              <label for="date-picker" class="button block w-[100%] relative text-left">
                 <span>
                   Une date spécifique
                   <ArrowIcon class="svg"/>
@@ -263,6 +273,7 @@ const pourRecurrentRoutines = async () => {
               </label>
             </form>
 
+            <!-- Dropdown icon calendrier -->
             <form v-show="specificDate?.date" class="date-form border-t-1 border-t-gray-300 border-solid text-center mt-3 pt-2 pb-5">
               <p class="title-h2">Déplacer au :</p>
               <span>
@@ -276,6 +287,7 @@ const pourRecurrentRoutines = async () => {
       </ol>
     </Transition>
 
+    <!-- Form de création/update -->
     <Transition name="slide-fade">
       <RoutineForm
         v-if="showRoutineForm"
@@ -288,18 +300,21 @@ const pourRecurrentRoutines = async () => {
     </Transition>
 
     <Transition name="slide-fade">
-      <ConfirmBox v-if="showRoutineConfirm" v-model="showRoutineConfirm" @confirm="deleteRoutine(routineSelected)" />
+      <ConfirmBox v-if="showRoutineConfirm" v-model="showRoutineConfirm" @confirm="deleteRoutine(routineSelected); toggleShowRoutineConfirm()" />
     </Transition>
 
     <Transition name="slide-fade">
-      <ConfirmBox title="Confirmer la suppression définitive multiple ?" v-if="showMultipleRoutineConfirm" v-model="showMultipleRoutineConfirm" @confirm="deletMultipleRoutine" />
+      <ConfirmBox title="Confirmer la suppression définitive multiple ?" v-if="showMultipleRoutineConfirm" v-model="showMultipleRoutineConfirm" @confirm="deletMultipleRoutine(); toggleShowMultipleRoutineConfirm()" />
     </Transition>
   </section>
 </template>
 
 <style scoped lang="scss">
 .daily-routine {
+  min-height: 100vh;
+  max-height: 100vh;
   padding: var(--padding);
+  overflow: auto;
 }
 .done {
   position: relative;
