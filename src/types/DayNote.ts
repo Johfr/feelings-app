@@ -8,4 +8,14 @@ export interface DayNote {
   month: Day["month"],
   year: Day["year"],
   moments: DayMoments[]
+  favoris?: boolean,
+  favorisNote?: string,
 }
+
+// version factorisée
+// type BaseDay = Pick<Day, "id" | "date" | "month" | "year">
+
+// export interface DayNote extends BaseDay {
+//   moments: DayMoments[],
+//   favoris?: boolean
+// }

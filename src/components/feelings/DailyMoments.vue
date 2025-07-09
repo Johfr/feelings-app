@@ -127,16 +127,17 @@ const showDrawerFn = () => {
           </div>
         </div>
       </section>
+      
+      <pre v-if="moment.content"  class="whitespace-pre-line text-sm font-[inherit] mt-3">
+        {{ moment.content }}
+      </pre>
+      <p v-else>...</p>
 
       <Teleport to=".popin-content">
         <Transition name="slide-fade">
           <Form v-if="showForm && formSection === moment.moment" v-model="showForm" :itemId="dayNote.id || '-1'" :moment="moment" :day="{ id: dayNote.id || '-1', date: dayNote.date, month: dayNote.month, year: dayNote.year }" @create="updateData" />
         </Transition>
       </Teleport>
-      <p v-if="moment.content">
-        {{ moment.content }}
-      </p>
-      <p v-else>...</p>
     </div>
 
     <!-- Drawer daily routine jour -->
