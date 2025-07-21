@@ -3,6 +3,13 @@ import { useDayNoteStore } from '@/stores/dayNoteStore'
 import { DayMoments } from '@/types/DayMoments'
 import { Day } from '@/types/Day'
 
+import { useColorStore } from '@/stores/colorStore'
+import { Colors } from '@/types/Colors'
+
+const store = useColorStore()
+store.loadColors()
+const colorsData = computed((): Colors[] => store.colorItems)
+
 const props = defineProps<{
   itemId: string,
   day: Day,
@@ -18,13 +25,19 @@ const showFormFn = () => {
 
 const localColor = ref(props.moment.color)
 const localContent = ref(props.moment.content)
+const isColorExist = computed(() => {
+  const colorExist = colorsData.value.filter(item => localColor.value === item.color)
+  if (colorExist.length > 0 || localColor.value === '') return true
+  return false
+})
 
 const formSubmit = async () => {
   const momentUpdated = {
     moment: props.moment.moment,
     color: localColor.value,
-    content: localContent.value
-  }
+    content: localContent.value,
+    colorPoint: colorsData.value.filter(item => localColor.value === item.color)[0]?.point 
+  }  
   
   // create
   if (props.itemId === '-1') {
@@ -35,7 +48,7 @@ const formSubmit = async () => {
       emit('create')
     }
   }
-  else {
+  else { // update
     const resp = await useDayNoteStore().update(props.itemId, momentUpdated)
     
     if (resp.status === 200) {
@@ -49,10 +62,11 @@ const formSubmit = async () => {
 <template>
   <form v-if="showForm">
     <h3 class="title-h3">
-      Mettre à jour : {{ moment.moment }}
+      Mettre à jour : {{ props.moment.moment }}
     </h3>
     <label for="input">
-      Couleur :
+      Couleur : 
+      <small class="text-xs text-red-500 font-normal">{{ !isColorExist ? "cette couleur n'existe pas" : '' }}</small>
     </label>
     <input type="text" name="" id="input" class="p-4" v-model="localColor">
     
@@ -64,7 +78,7 @@ const formSubmit = async () => {
     </textarea>
 
     <div class="button-container">
-      <button type="submit" class="submit" @click.prevent="formSubmit">Sauvegarder</button>
+      <button type="submit" class="submit disabled:opacity-50 disabled:cursor-not-allowed" @click.prevent="formSubmit" :disabled="!isColorExist">Sauvegarder</button>
       <button type="button" @click="showFormFn">Annuler</button>
     </div>
   </form>
