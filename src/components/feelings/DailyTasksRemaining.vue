@@ -47,7 +47,7 @@ const openPopin = ():void => {
 <template>
   <!-- Tâches restantes  -->
   <div class="mt-3 ml-2 cursor-pointer inline-block" v-if="currentDailyRoutineTotal && currentDailyRoutineTotal > 0" @click="openPopin">
-    <p v-if="currentRoutineLeft.length === 0" class="text-indigo-400">
+    <p v-if="currentRoutineLeft.length === 0" class="text-xs md:text-sm text-indigo-400">
       Félicitation ! Tu as réalisé toutes tes tâches de ta journée. Tu peux être fier de toi !
     </p>
 

@@ -21,14 +21,15 @@ const props = defineProps<{
 
 const data = computed((): DayNote[] => store.dayNoteItems.filter((item: DayNote) => item.month === useMonthNumber(props.month) && item.year === props.year))
 
-const { colorStats, totalPoints, totalColors } = useColorsStats(colorsData, data)
+const { colorStats, totalPoints, totalColors } = useColorsStats(data)
+const positiveSumCumulated = computed(() => totalPoints.value.positive + Math.abs(totalPoints.value.neutre - totalPoints.value.negative) )
 
 const monthTendency = computed(() => {
   let difficulty = (totalColors.value * 0.05) // 5% : mois neutre
   
-  if (totalPoints.value >= (totalColors.value / 2)) {
+  if (positiveSumCumulated.value >= (totalColors.value / 2)) {
     return 'mois positif'
-  } else if ((totalPoints.value >= (totalColors.value / 2) - difficulty && totalPoints.value <= (totalColors.value / 2) + difficulty )) {
+  } else if ((positiveSumCumulated.value >= (totalColors.value / 2) - difficulty && positiveSumCumulated.value <= (totalColors.value / 2) + difficulty )) {
     return 'mois neutre'
   } else {
     return 'mois négatif'
@@ -60,8 +61,17 @@ const showTendenceFn = (): void => {
   <Transition name="fade">
     <div v-if="showTendence">
       <p class="border-l-5 border-l-solid border-l p-2 inline-block mt-1" :class="monthTendency ? 'text-green-500 ' : 'text-red-500 '">
-        {{ monthTendency }} ({{ totalPoints }}/{{ totalColors }})
+        {{ monthTendency }} ({{ positiveSumCumulated }}/{{ totalColors }})
       </p>
+      <small>
+        {{ totalPoints.positive }} moments positifs +
+      </small>
+      <small>
+        ({{ totalPoints.negative }} moments négatifs -
+      </small>
+      <small>
+        {{ totalPoints.neutre }} moments neutres)
+      </small>
       <GraphBar v-if="colorStats.length" :colorStats="colorStats" />
     </div>
   </Transition>

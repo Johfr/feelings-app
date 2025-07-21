@@ -1,22 +1,16 @@
 // useColorsStats.ts
-import { computed } from 'vue'
-// import { colorsMeaning } from '@/composables/useColorsMeaning'
-import { Colors } from '@/types/Colors'
-import { DayNote } from '@/types/DayNote'
+import { computed, type ComputedRef } from 'vue'
+import type { DayNote } from '@/types/DayNote'
 
-// Helper pour obtenir le "point" d'une couleur
-const getColorPoint = (colors: ComputedRef<Colors[]>, color: string): number => {
-  return colors.value.find(c => c.color === color)?.point ?? 0
-}
-
-export const useColorsStats = (colors: ComputedRef<Colors[]>, dataRef: ComputedRef<DayNote[]>) => {
+export const useColorsStats = (dataRef: ComputedRef<DayNote[]>) => {
+  // Toutes les couleurs utilisées
   const allColors = computed(() =>
     dataRef.value.flatMap(day =>
-      day.moments.map(moment => moment.color).filter(color => color)
+      day.moments.map(moment => moment.color).filter(Boolean)
     )
-  )  
+  )
 
-  // Compte les occurrences pour chaque couleur
+  // Statistiques de couleurs : nb d'occurrences de chaque couleur
   const colorStats = computed(() =>
     Object.entries(
       allColors.value.reduce((acc, color) => {
@@ -26,17 +20,28 @@ export const useColorsStats = (colors: ComputedRef<Colors[]>, dataRef: ComputedR
     ).map(([color, qty]) => ({ color, qty }))
   )
 
-  // Calcul du total de points
-  const totalPoints = computed(() =>
-    allColors.value.reduce((sum, color) => sum + getColorPoint(colors, color), 0)
-  )
+  // Calcul des points cumulés par catégorie
+  const totalPoints = computed(() => {
+    const total = { positive: 0, negative: 0, neutre: 0 }
 
-  // Nombre total de couleurs utilisées (utile pour un ratio)
+    dataRef.value.forEach(day => {
+      day.moments.forEach(moment => {
+        if (typeof moment.colorPoint === 'number') {
+          if (moment.colorPoint > 0) total.positive += moment.colorPoint
+          else if (moment.colorPoint < 0) total.negative += Math.abs(moment.colorPoint)
+          else total.neutre += 1 // tu peux aussi faire += moment.colorPoint si 0 a un poids
+        }
+      })
+    })
+
+    return total
+  })
+
   const totalColors = computed(() => allColors.value.length)
 
   return {
     colorStats,
     totalPoints,
-    totalColors,
+    totalColors
   }
 }
