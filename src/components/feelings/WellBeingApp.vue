@@ -13,13 +13,14 @@ import BackButton from '@/components/utils/BackButton.vue'
 import Drawner from '@/components/utils/Drawer.vue'
 // import Popin from '@/components/utils/Popin.vue'
 import { useMonthName, useMonthNumber, useCurrentDay, useDayNumber, useCurrentDate, useCurrentMonth, useCurrentYear } from '@/composables/useDate'
+import { useEmoji } from '@/composables/useEmoji'
 import { useRecurrentRoutineStore } from '@/stores/recurrentRoutineStore'
 import { useCurrentRoutineStore } from '@/stores/currentRoutineStore'
 import { useDayNoteStore } from '@/stores/dayNoteStore'
 import { RecurrentRoutine } from '@/types/RecurrentRoutine'
 import DailyTasksRemaining from './DailyTasksRemaining.vue'
 import { CurrentRoutine } from '@/types/CurrentRoutine'
-// import { DayNote } from '@/types/DayNote'
+import { DayNote } from '@/types/DayNote'
 import { Day } from '@/types/Day'
 
 const currentRoutinesStore = useCurrentRoutineStore()
@@ -54,6 +55,30 @@ const currentDailyRoutines = computed((): CurrentRoutine[] => currentRoutinesSto
 
 const daySelected = ref<Day>()
 const showPopin = ref<boolean>(false)
+
+// calcule les points de la journée en fonction de l'humeur et retourne l'émoji associé
+const dayPointsCount = (dayNumber: number): string | null => {  
+  const itemsFound = noteStore.dayNoteItems.filter(item => {
+    if (item.month === useMonthNumber(routeMonth.value) && item.year === routeYearNumber.value && item.date === dayNumber) {
+      
+      return item
+    }
+  })
+
+  let colorCount = 0
+  let asColorPoints = false
+
+  itemsFound.map(item => {
+    item.moments.map(moment => {
+      if (moment?.colorPoint) {
+        colorCount += moment?.colorPoint
+        asColorPoints = true
+      }
+    })
+  })
+
+  return asColorPoints ? useEmoji.find(emoji => emoji.value === colorCount).icon : null
+}
 
 const showPopinFn = ():void => {
   showPopin.value = !showPopin.value
@@ -176,6 +201,9 @@ const time = computed(() => {
               <p
                 class="day_number"
               >
+              <span class="text-lg">
+                {{ dayPointsCount(slotProps.date) }}
+              </span>
                 <span class="hidden md:inline-block">
                   {{ useDayNumber(slotProps.date, routeMonthNumber, routeYearNumber) }}
                 </span>

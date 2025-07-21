@@ -9,11 +9,11 @@ const props = defineProps<{
   year: number,
 }>()
 
-const store = useDayNoteStore()
-store.loadDayNotes()
+const noteStore = useDayNoteStore()
+noteStore.loadDayNotes()
 
 const data = computed((): DayNote[] => {
-  const itemsFound = store.dayNoteItems.filter(item => {
+  const itemsFound = noteStore.dayNoteItems.filter(item => {
     if (item.month === useMonthNumber(props.month) && item.year === props.year && item.date === props.date) {
       return item
     }
