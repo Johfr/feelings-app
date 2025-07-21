@@ -212,11 +212,11 @@ const pourRecurrentRoutines = async () => {
 
     <!-- Tasks list -->
     <Transition name="slide-fade">
-      <ol class="list-decimal" v-if="sortedRoutines.length > 0">
+      <ol class="routine-list list-decimal" v-if="sortedRoutines.length > 0">
         <li
           :for="routine.id" v-for="(routine, routineId) in sortedRoutines"
           :key="routine.id"
-          class="routine-list flex flex-wrap justify-between flex-col py-3 cursor-context-menu relative"
+          class="routine-item flex flex-wrap justify-between flex-col py-3 cursor-context-menu relative"
         >
           <div class="flex items-center">
             <input
@@ -235,8 +235,8 @@ const pourRecurrentRoutines = async () => {
               :class="{'bg-blue-500': routine.done}"
             />
 
-            <p
-              class="cursor-pointer"
+            <pre
+              class="whitespace-pre-line text-sm font-[inherit] cursor-pointer"
               :class="{
                 'done': (routine.done && routine.title.split('').length <= 50),
                 'line-through decoration-black': (routine.done && routine.title.split('').length > 50)
@@ -245,7 +245,7 @@ const pourRecurrentRoutines = async () => {
               title="cliquer pour Modifier"
             >
               {{ routine.title }}
-            </p>
+            </pre>
           </div>
 
           <div class="cta-container flex items-center justify-end md:opacity-0">
@@ -263,13 +263,13 @@ const pourRecurrentRoutines = async () => {
 
             <!-- Bouton icon calendrier -->
             <form>
-              <label for="date-picker" class="button block w-[100%] relative text-left">
+              <label for="date-picker2" class="button block w-[100%] relative text-left">
                 <span>
                   Une date spécifique
                   <ArrowIcon class="svg"/>
                 </span>
 
-                <input id="date-picker" type="date" @change="formatDate">
+                <input id="date-picker2" type="date" @change="formatDate">
               </label>
             </form>
 
@@ -314,7 +314,7 @@ const pourRecurrentRoutines = async () => {
   min-height: 100vh;
   max-height: 100vh;
   padding: var(--padding);
-  overflow: auto;
+  overflow: scroll;
 }
 .done {
   position: relative;
@@ -338,8 +338,11 @@ const pourRecurrentRoutines = async () => {
     width: 100%;
   }
 }
-
-.routine-list {
+// .routine-list {
+//   overflow: scroll;
+//   height: 100vh;
+// }
+.routine-item {
   .cta-container {
     position: relative;
     transition: .4s ease;

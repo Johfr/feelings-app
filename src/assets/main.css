@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import './app.css';
+@import "tailwindcss";
 
 /* @import './base.css'; */
 /* @import './reset.css'; */
@@ -13,6 +13,7 @@ body {
   
   background-image: radial-gradient(circle 120px at 2% 15%, white, yellow, lightyellow, #f4fcff);
   background-attachment: fixed;
+  background-repeat: no-repeat;
   
 
   &.afternoon {
@@ -32,7 +33,7 @@ body {
   }
 
   @media (min-width: 1024px) {
-    background-image: radial-gradient(circle 120px at 2% 20%, white, yellow, lightyellow, #f4fcff);
+    background-image: radial-gradient(circle 120px at 2% 20%, white, yellow, lightyellow, #f4fcff); /* f3fcff */
     background-attachment: inherit;
   }
 }

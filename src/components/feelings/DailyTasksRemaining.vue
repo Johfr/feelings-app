@@ -51,11 +51,11 @@ const openPopin = ():void => {
       Félicitation ! Tu as réalisé toutes tes tâches de ta journée. Tu peux être fier de toi !
     </p>
 
-    <p v-else class="text-indigo-400">
+    <p v-else class="text-xs md:text-sm text-indigo-400">
       {{ currentRoutineLeft.length }} tâches restantes pour aujourd'hui ( {{ useCurrentDate }} {{ useMonthName(useCurrentMonth) }} {{ useCurrentYear }} ). Tu peux le faire 💪
     </p>
     
-    <p>
+    <p class="text-xs md:text-sm">
       <span class="font-bold">{{ totalMonthlyRoutinesDone.length }}</span>/{{ totalMonthlyRoutines.length }} tâches réalisées ce mois-ci ({{ actifMonth }})
     </p>
 

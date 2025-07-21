@@ -14,7 +14,7 @@ export const useColorsStats = (colors: ComputedRef<Colors[]>, dataRef: ComputedR
     dataRef.value.flatMap(day =>
       day.moments.map(moment => moment.color).filter(color => color)
     )
-  )
+  )  
 
   // Compte les occurrences pour chaque couleur
   const colorStats = computed(() =>

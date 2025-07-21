@@ -16,18 +16,11 @@ const setHour = () => {
 
 onMounted(() => setHour())
 
-// setInterval(() => {
-//   const hour = setHour()
-//   console.log('maj à : ' + hour + 'h')
-  
-// }, 3600000)
-
 // TODO 
 // Faire de l'app la page principale
 </script>
 
 <template>
-  <!-- <Navbar /> -->
   <RouterView />
 </template>
 

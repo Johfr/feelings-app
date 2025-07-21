@@ -2,5 +2,6 @@
 export interface DayMoments {
   moment: string,
   color: string,
-  content: string
+  content: string,
+  colorPoint?: number
 }

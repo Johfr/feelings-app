@@ -31,7 +31,7 @@ const totalMonthDaysAdjusted = computed(() => {
     <li
       v-for="(date, dayIndex) of totalMonthDaysAdjusted" :key="dayIndex"
       class="day-item relative"
-      :class="{'md:border-1 md:border-dashed md:border-red-300': date === useCurrentDate, 'cursor-pointer' : date !== 0}"
+      :class="{'md:border-1 md:border-dashed md:border-red-500': date === useCurrentDate, 'cursor-pointer' : date !== 0}"
     >
       <slot name="item" :date="date" />
 
@@ -64,6 +64,7 @@ const totalMonthDaysAdjusted = computed(() => {
 
   @media (min-width: 768px) {
     height: 80px;
+    width: 12%;
   }
 
   @media (min-width: 960px) {

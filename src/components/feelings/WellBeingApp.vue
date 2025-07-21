@@ -19,7 +19,7 @@ import { useDayNoteStore } from '@/stores/dayNoteStore'
 import { RecurrentRoutine } from '@/types/RecurrentRoutine'
 import DailyTasksRemaining from './DailyTasksRemaining.vue'
 import { CurrentRoutine } from '@/types/CurrentRoutine'
-import { DayNote } from '@/types/DayNote'
+// import { DayNote } from '@/types/DayNote'
 import { Day } from '@/types/Day'
 
 const currentRoutinesStore = useCurrentRoutineStore()
@@ -110,6 +110,20 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
   //   toaster('ok')
   // }
 }
+
+const time = computed(() => {
+  let hour = ref()
+  let minutes = ref()
+  let secondes = ref()
+  setInterval(() => {
+    hour.value = new Date().getHours()
+    minutes.value = new Date().getMinutes()
+    secondes.value = new Date().getSeconds()
+    
+  }, 1000)
+
+  return { hour, minutes, secondes }
+})
 </script>
 
 <template>
@@ -128,6 +142,8 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
     <button @click="showRecurrentDrawerFn" class="">
       Créer des tâches récurrentes
     </button>
+    {{ time.hour }}:{{ time.minutes }}:{{ time.secondes }}
+
     
     <MonthName :routeMonth="routeMonth" :routeYear="routeYearNumber" />
 
@@ -144,47 +160,49 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
         <template v-slot:item="slotProps">
           <!-- <div v-if="(routeMonthNumber < useCurrentMonth || (slotProps.date < useCurrentDate && routeMonthNumber === useCurrentMonth))" class="day_finished right hidden md:block" />
           <div v-if="(routeMonthNumber < useCurrentMonth || (slotProps.date < useCurrentDate && routeMonthNumber === useCurrentMonth))" class="day_finished left hidden md:block" /> -->
-          <div
-            v-if="slotProps.date"
-            class="day_number-wrapper"
-            :class=" (
-              routeYearNumber < useCurrentYear // pour toutes les années précédentes
-              || (routeYearNumber <= useCurrentYear && routeMonthNumber < useCurrentMonth) // pour mois précédent au mois en cours
-              || (routeYearNumber <= useCurrentYear && slotProps.date < useCurrentDate && routeMonthNumber === useCurrentMonth) // pour les jours du mois en cours
-            )
-            ? 'text-[#aab0b2] bg-[#ffffff8c]'
-            : 'bg-white'"
-            @click="openPopin(slotProps.date, routeMonthNumber, routeYearNumber)" 
-          >
-            <p
-              class="day_number"
+          <div class="day_number-bg ">
+            <div
+              v-if="slotProps.date"
+              class="day_number-wrapper"
+              :class=" (
+                routeYearNumber < useCurrentYear // pour toutes les années précédentes
+                || (routeYearNumber <= useCurrentYear && routeMonthNumber < useCurrentMonth) // pour mois précédent au mois en cours
+                || (routeYearNumber <= useCurrentYear && slotProps.date < useCurrentDate && routeMonthNumber === useCurrentMonth) // pour les jours du mois en cours
+              )
+              ? 'opacity-50'
+              : 'bg-white/20 md:border-2 md:border-white md:border-solid'"
+              @click="openPopin(slotProps.date, routeMonthNumber, routeYearNumber)" 
             >
-              <span class="hidden md:inline-block">
-                {{ useDayNumber(slotProps.date, routeMonthNumber, routeYearNumber) }}
-              </span>
-              {{ slotProps.date }}
-            </p>
+              <p
+                class="day_number"
+              >
+                <span class="hidden md:inline-block">
+                  {{ useDayNumber(slotProps.date, routeMonthNumber, routeYearNumber) }}
+                </span>
+                {{ slotProps.date }}
+              </p>
 
-            <!-- affichage des tâches créées uniquement pour les jours associés -->
-            <div class="has-tasks flex max-w-[100%] right-0 absolute bottom-1 lg:bottom-3 lg:right-1 overflow-hidden">
-              <div v-for="task in currentMonthlyRoutines.filter((item) => item.date === slotProps.date )" :key="task.id">
-                <div
-                  class="bg-blue-500 w-1 h-1 lg:w-2 lg:h-2 rounded-[50%] ml-[1px]"
-                  :class="[
-                    {
-                      'opacity-[0.5]' : (
-                        routeMonthNumber < useCurrentMonth
-                        || (slotProps.date < useCurrentDate && routeMonthNumber === useCurrentMonth)
-                      )
-                    },
-                    { 'bg-red-500' : !task.done }
-                  ]"
-                />
+              <!-- affichage des tâches (todos) créées uniquement pour les jours associés -->
+              <div class="has-tasks flex max-w-[100%] right-0 absolute bottom-1 lg:bottom-3 lg:right-1 overflow-hidden">
+                <div v-for="task in currentMonthlyRoutines.filter((item) => item.date === slotProps.date )" :key="task.id">
+                  <div
+                    class="bg-blue-500 w-1 h-1 lg:w-2 lg:h-2 rounded-[50%] ml-[1px]"
+                    :class="[
+                      {
+                        'opacity-[0.5]' : (
+                          routeMonthNumber < useCurrentMonth
+                          || (slotProps.date < useCurrentDate && routeMonthNumber === useCurrentMonth)
+                        )
+                      },
+                      { 'bg-red-500' : !task.done }
+                    ]"
+                  />
+                </div>
               </div>
             </div>
           </div>
-
         </template>
+
         <template v-slot="slotProps">
           <CalendarMomentsColor :month="routeMonth" :year="routeYearNumber" :date="slotProps.date" />
         </template>
@@ -254,9 +272,16 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
     color: #aab0b2; //bdc3c5
   }
 }
+
+.day_number-bg {
+  width: 100%;
+}
+
 .day_number-wrapper {
   width: 100%;
-  
+  height: 100%;
+  // background-color: rgba(255, 255, 255, 0.3);
+
   @media (min-width: 960px) {
   }
 }
@@ -268,6 +293,7 @@ const deleteRoutine = async (routineSelected: RecurrentRoutine) => {
   text-align: right;
   position: absolute;
 }
+
 .day_finished {
   width: 70%;
   height: 70%;

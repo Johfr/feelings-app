@@ -119,6 +119,7 @@ const showFormFn = (type: string, data: Colors = null): void => {
     width: 10px;
     height: 10px;
     margin-right: 10px;
+    border-radius: 50%;
   
     @media (min-width: 960px) {
       min-width: 20px;
