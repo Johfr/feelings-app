@@ -161,7 +161,7 @@ button, .button {
   overflow: scroll;
   
   @media (min-width: 1024px) {
-    /* height: calc(100vh - 400px); */
+    /* height: calc(100vh - 300px); */
     height: 100%;
   }
 }
@@ -180,6 +180,21 @@ button, .button {
   right: 15px;
   cursor: pointer;
   z-index: 2;
+}
+
+
+/* FORM */
+label {
+  font-weight: 700;
+  /* margin-top: 25px; */
+}
+
+textarea {
+  min-height: 150px;
+}
+
+textarea, input {
+  border-bottom: 1px solid #f1f1f1;
 }
 
 /* COLORS */

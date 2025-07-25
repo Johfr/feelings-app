@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import ConfirmBox from '@/components/utils/ConfirmBox.vue'
+import { NSpace, NDynamicTags } from 'naive-ui'
 
 const props = defineProps<{
   id: string | undefined,
-  goal:string | undefined
+  goal: string | undefined,
+  tags: string[]
 }>()
 
 const emit = defineEmits(['create', 'update', 'delete'])
@@ -14,12 +16,13 @@ const showFormFn = () => {
 }
 
 const localGoal = ref<string>(props?.goal || null)
+const tags = ref<string[]>(props.tags || [])
 
 const formSubmit = async () => {
   if (!props.id) {
-    emit('create', localGoal.value)
+    emit('create', tags.value)
   } else {
-    emit('update', props.id, localGoal.value)
+    emit('update', props.id, tags.value)
   }
 }
 
@@ -39,23 +42,46 @@ const deleteGoal = () => {
     <section>
       <div class="flex items-center justify-between">
         <h3 class="title-h3">
-          Mettre à jour l'objectif
+          Mes Tags
         </h3>
 
         <button v-if="props.id" type="button" class="delete-button" title="supprimer l'objectif" @click="showConfirmFn">
-          Supprimer
+          Tout supprimer
         </button>
       </div>
-
+      
       <div>
-        <div class="flex flex-col mt-3">
-          <label for="title">
-            Titre :
-          </label>
-          <textarea type="text" name="" id="title" class="p-4" v-model="localGoal">
-            {{ localGoal }}
-          </textarea>
-        </div>
+
+        <section class="flex flex-col mt-3">
+          <!-- <p class=" text-sm mt-5">
+            Ton mois est une quête. Choisis ton archétype. Remplis des quêtes quotidiennes. Gagne des points de compétence.
+            Transforme ton mental et tes habitudes
+          </p> -->
+
+          <!-- <label for="tags">
+            Tags : Dynamic Tags Naive
+          </label> -->
+
+          <p class="italic text-sm mt-5">
+            Cible tes objectifs et définis les aspects de ta personne que tu veux voir évoluer (max 3 à 5 tags pour ne pas t'éparpiller, c'est déjà un bon début)
+          </p>
+
+          <p class="italic text-sm text-blue-500">
+            (Tu pourras tagger tes todos avec et suivre ton évolution)
+          </p>
+
+          <p class="text-sm my-2">
+            Choisis les skills ou les personnalités que tu veux développer : yogiste (pour les étirements, gainage), développeur (pour le code), culturiste (pour la muscu ou le workout) etc. 
+          </p>
+
+          <small class="italic text-xs mt-2 mb-2">
+            Exemple: Projet pro, sport, développement personnel, musique, création, souplesse etc.
+          </small>
+          
+          <n-space vertical>
+            <n-dynamic-tags v-model:value="tags" type="info" />
+          </n-space>
+        </section>
 
         <Transition name="slide-fade">
           <ConfirmBox v-if="showConfirm" v-model="showConfirm" @confirm="deleteGoal" />
@@ -66,7 +92,6 @@ const deleteGoal = () => {
           <button type="button" @click="showFormFn">Annuler</button>
         </div>
       </div>
-        
     </section>
   </form>
 </template>
@@ -83,19 +108,6 @@ form {
   padding: 16px;
   background-color: #fff;
 }
-
-// label {
-//   font-weight: 700;
-//   margin-top: 25px;
-// }
-
-// textarea {
-//   min-height: 200px;
-// }
-
-// textarea, input {
-//   border-bottom: 1px solid #f1f1f1;
-// }
 
 .button-container {
   display: flex;

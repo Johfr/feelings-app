@@ -10,29 +10,39 @@ export const useGoalStore = defineStore('goal', () => {
   }
 
   const findOne = async (month: number, year: number): Promise<Goal> => items.value.find((item): boolean => item.year === year && item.month === month)
-  
-  const updateGoal = async (itemId: string, goalUpdated: string): Promise<{status: number, message: string}> => {
-    const index = items.value.findIndex((item): Boolean => item.id === itemId)
 
-    const itemCopy = {...items.value[index]}
-    itemCopy.goal = goalUpdated
+  const updateGoal = async (itemId: string, goalUpdated: string | null, tagsUpdated: string[] | null): Promise<{ status: number; message: string }> => {
+    const index = items.value.findIndex((item) => item.id === itemId)
+    if (index === -1) return { status: 404, message: 'Item not found' }
 
-    const resp = await update(itemCopy, 'PUT')
+    const original = items.value[index]
+    const updated = { ...original }
 
-    // maj faite, on met à jour localement
+    if (goalUpdated !== null) updated.goal = goalUpdated
+    if (tagsUpdated !== null) updated.tags = tagsUpdated
+
+    // Si goal et tags sont tous les deux "vides" on supprime l'objet
+    const isNowEmpty = !updated.goal?.trim() && updated.tags?.length === 0
+    if (isNowEmpty) {
+      return await deleteGoal(itemId)
+    }
+
+    const resp = await update(updated, 'PUT') // Ou PATCH selon ton backend
+
     if (resp.status === 200) {
-      items.value[index].goal = itemCopy.goal    
+      items.value[index] = updated
     }
 
     return resp
   }
 
-  const createGoal = async (newGoalTitle: string, routeMonthNumber: number, routeYear: number): Promise<{status: number, message: string}> => {
+  const createGoal = async (newGoalTitle: string, routeMonthNumber: number, routeYear: number, tags: string[] = []): Promise<{status: number, message: string}> => {
     const newGoal = {
       id: crypto.randomUUID(),
       goal: newGoalTitle,
       month: routeMonthNumber,
-      year: routeYear
+      year: routeYear,
+      tags
     }
 
     const resp = await update(newGoal, 'POST')
@@ -47,7 +57,7 @@ export const useGoalStore = defineStore('goal', () => {
   
   const deleteGoal = async (itemId: string): Promise<{status: number, message: string}> => {
     const index = items.value.findIndex((item): Boolean => item.id === itemId)
-
+    
     const resp = await update(items.value[index], 'DELETE')
 
     // maj faite, on met à jour localement
@@ -58,6 +68,33 @@ export const useGoalStore = defineStore('goal', () => {
     return resp
   }
 
+  const deleteGoalField = async (itemId: string, field: 'goal' | 'tags'): Promise<{ status: number; message: string }> => {
+    const index = items.value.findIndex((item) => item.id === itemId)
+    if (index === -1) return { status: 404, message: 'Item not found' }
+
+    const item = { ...items.value[index] }
+
+    // Supprimer le champ demandé
+    if (field === 'goal') item.goal = ''
+    if (field === 'tags') item.tags = []
+
+    // Vérification : supprimer complètement si vide
+    const isNowEmpty = !item.goal?.trim() && item.tags?.length === 0
+    if (isNowEmpty) {
+      return await deleteGoal(itemId) // Appelle la suppression globale existante
+    }
+
+    // Sinon, on fait juste une mise à jour partielle
+    const resp = await update(item, 'PATCH') // ou PUT selon ton API
+
+    if (resp.status === 200) {
+      items.value[index] = item
+    }
+
+    return resp
+  }
+
+
   return {
     items,
     loading,
@@ -65,6 +102,6 @@ export const useGoalStore = defineStore('goal', () => {
     findOne,
     create: createGoal,
     update: updateGoal,
-    delete: deleteGoal,
+    delete: deleteGoalField,
   }
 })

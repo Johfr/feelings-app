@@ -22,6 +22,10 @@ import DailyTasksRemaining from './DailyTasksRemaining.vue'
 import { CurrentRoutine } from '@/types/CurrentRoutine'
 import { DayNote } from '@/types/DayNote'
 import { Day } from '@/types/Day'
+import { FormQuestion } from '@/types/FormQuestion'
+import StepForm from '@/components/utils/StepForm.vue'
+import MonthGoalTags from './MonthGoalTags.vue'
+
 
 const currentRoutinesStore = useCurrentRoutineStore()
 currentRoutinesStore.loadRoutines()
@@ -56,29 +60,200 @@ const currentDailyRoutines = computed((): CurrentRoutine[] => currentRoutinesSto
 const daySelected = ref<Day>()
 const showPopin = ref<boolean>(false)
 
-// calcule les points de la journée en fonction de l'humeur et retourne l'émoji associé
-const dayPointsCount = (dayNumber: number): string | null => {  
-  const itemsFound = noteStore.dayNoteItems.filter(item => {
-    if (item.month === useMonthNumber(routeMonth.value) && item.year === routeYearNumber.value && item.date === dayNumber) {
-      
-      return item
+const emojiValueMap = new Map<string, number>(
+  useEmoji.map(({ icon, value }) => [icon, value])
+)
+const dayEmojisStats = computed(() => {
+  let totalPositive = 0
+  let totalNegative = 0
+  let totalNeutre = 0
+
+  dayEmojisByDate.value.forEach((emoji) => {
+    const value = emojiValueMap.get(emoji) ?? 0
+    if (value > 0) totalPositive++
+    else if (value < 0) totalNegative++
+    else totalNeutre++
+  })
+
+  return { totalPositive, totalNegative, totalNeutre }
+})
+
+// regroupement des jours +, -, neutre
+const dayGroupedByMood = computed(() => {
+  const positiveDays: number[] = []
+  const neutralDays: number[] = []
+  const negativeDays: number[] = []
+
+  dayEmojisByDate.value.forEach((emoji, day) => {
+    const value = emojiValueMap.get(emoji) ?? 0
+
+    if (value > 0) positiveDays.push(day)
+    else if (value < 0) negativeDays.push(day)
+    else neutralDays.push(day)
+  })
+
+  return {
+    positiveDays,
+    neutralDays,
+    negativeDays
+  }
+})
+
+const momentStats = computed(() => {
+  const result = {
+    morning: { positive: [], neutral: [], negative: [] },
+    afternoon: { positive: [], neutral: [], negative: [] },
+    night: { positive: [], neutral: [], negative: [] }
+  }
+
+  noteStore.dayNoteItems.forEach(item => {
+    if (
+      item.month === useMonthNumber(routeMonth.value) &&
+      item.year === routeYearNumber.value
+    ) {
+      item.moments.forEach(moment => {
+        const point = moment.colorPoint
+        const day = item.date
+        const momentKey = moment.moment as 'morning' | 'afternoon' | 'night'
+
+        if (typeof point !== 'number') return
+
+        if (point > 0) {
+          result[momentKey].positive.push(day)
+        } else if (point < 0) {
+          result[momentKey].negative.push(day)
+        } else {
+          result[momentKey].neutral.push(day)
+        }
+      })
     }
   })
 
-  let colorCount = 0
-  let asColorPoints = false
+  // const formatted = {} as Record<string, Record<'positive' | 'neutral' | 'negative', { number: number, days: number[] }>>
 
-  itemsFound.map(item => {
-    item.moments.map(moment => {
-      if (moment?.colorPoint) {
-        colorCount += moment?.colorPoint
-        asColorPoints = true
+  // for (const moment of ['morning', 'afternoon', 'night']) {
+  //   formatted[moment] = {
+  //     positive: { number: result[moment].positive.length, days: result[moment].positive },
+  //     neutral: { number: result[moment].neutral.length, days: result[moment].neutral },
+  //     negative: { number: result[moment].negative.length, days: result[moment].negative }
+  //   }
+  // }
+
+  // return formatted
+
+  return {
+    morning: {
+      positive: {
+        number: result.morning.positive.length,
+        days: result.morning.positive
+      },
+      negative: {
+        number: result.morning.negative.length,
+        days: result.morning.negative
+      },
+      neutral: {
+        number: result.morning.neutral.length,
+        days: result.morning.neutral
       }
-    })
+    },
+    afternoon: {
+      positive: {
+        number: result.afternoon.positive.length,
+        days: result.afternoon.positive
+      },
+      negative: {
+        number: result.afternoon.negative.length,
+        days: result.afternoon.negative
+      },
+      neutral: {
+        number: result.afternoon.neutral.length,
+        days: result.afternoon.neutral
+      }
+    },
+    night: {
+      positive: {
+        number: result.night.positive.length,
+        days: result.night.positive
+      },
+      negative: {
+        number: result.night.negative.length,
+        days: result.night.negative
+      },
+      neutral: {
+        number: result.night.neutral.length,
+        days: result.night.neutral
+      }
+    }
+  }
+})
+
+
+// calcule les points de la journée en fonction de l'humeur et retourne l'émoji associé
+const dayEmojisByDate = computed(() => {
+  const result = new Map<number, string>()
+
+  noteStore.dayNoteItems.forEach((item: DayNote) => {
+    if (item.month === useMonthNumber(routeMonth.value) && item.year === routeYearNumber.value) {
+      let colorCount = 0
+      let asColorPoints = false
+
+      item.moments.forEach(moment => {
+        if (typeof moment?.colorPoint === 'number') {
+          colorCount += moment.colorPoint
+          asColorPoints = true
+        }
+      })
+
+      if (asColorPoints) {
+        const emoji = useEmoji.find(e => e.value === colorCount)?.icon
+        if (emoji) result.set(item.date, emoji)
+      }
+    }
   })
 
-  return asColorPoints ? useEmoji.find(emoji => emoji.value === colorCount).icon : null
-}
+  return result
+})
+
+
+
+// let colorMonthCount = ref(0)
+// let daysHumor = ref([])
+// const totalDays = 31
+// // calcule les points de la journée en fonction de l'humeur et retourne l'émoji associé
+// const dayPointsCount = (dayNumber: number): {date: Number, icon: string} | null => {
+//   console.log(dayNumber);
+//   const itemsFound = noteStore.dayNoteItems.find(item => {
+//     if (item.month === useMonthNumber(routeMonth.value) && item.year === routeYearNumber.value && item.date === dayNumber) {
+//       return item
+//     }
+//   })
+
+//   let itemDate = 0
+//   let colorCount = 0
+//   let asColorPoints = false
+
+//   if (!itemsFound) return
+
+//   itemsFound?.moments.map(moment => {
+//     if (moment?.colorPoint) {
+//       colorCount += moment?.colorPoint
+//       itemDate = itemsFound.date
+      
+//       colorMonthCount.value += moment?.colorPoint
+//       asColorPoints = true
+//     }
+//   })
+
+//   asColorPoints ? daysHumor.value.push({
+//     date: itemDate,
+//     icon: useEmoji.find(emoji => emoji.value === colorCount).icon
+//   }) : null
+// }
+// for(let dayNumber = 1; dayNumber <= totalDays; dayNumber++) {
+//   dayPointsCount(dayNumber)
+// }
+
+
 
 const showPopinFn = ():void => {
   showPopin.value = !showPopin.value
@@ -164,20 +339,32 @@ const time = computed(() => {
   <!-- Passer les routines done en fin de liste -->
    <div class="month-container" :class="{fade : showPopin}">
     <BackButton routeName="year" :btnText="'Retour'" />
+    
     <button @click="showRecurrentDrawerFn" class="">
       Créer des tâches récurrentes
     </button>
-    {{ time.hour }}:{{ time.minutes }}:{{ time.secondes }}
 
-    
+    <span>
+      {{ time.hour }}:{{ time.minutes }}:{{ time.secondes }}
+    </span>
+    <!-- 
+    <p>{{ dayEmojisStats }}</p>
+    <p>{{ dayGroupedByMood }}</p>
+    <p>
+      {{ momentStats }}
+    </p> -->
+
+    <!-- Faire une analyse des données dayGroupedByMood au niveau : Pairs/Impairs, Nombres premiers, Suite de fibonacci, numérologie ?, cycle circasptan,cycles astrologiques ? -->
+
     <MonthName :routeMonth="routeMonth" :routeYear="routeYearNumber" />
 
     <!-- Tâches restantes  -->
     <DailyTasksRemaining :actifMonth="routeMonth" :actifMonthNumber="routeMonthNumber" :actifYear="routeYearNumber" @openpopin="openCurrentRoutine"/>
 
     <MonthTendence :month="routeMonth" :year="routeYearNumber" />
-
+      
     <MonthGoal :routeMonthNumber="routeMonthNumber" :routeYear="routeYearNumber" />
+    <!-- <MonthGoalTags :routeMonthNumber="routeMonthNumber" :routeYear="routeYearNumber" /> -->
     
     <!-- Calendrier -->
      <div class="md:flex md:justify-between md:gap-10">
@@ -201,13 +388,15 @@ const time = computed(() => {
               <p
                 class="day_number"
               >
-              <span class="text-lg">
-                {{ dayPointsCount(slotProps.date) }}
-              </span>
                 <span class="hidden md:inline-block">
                   {{ useDayNumber(slotProps.date, routeMonthNumber, routeYearNumber) }}
                 </span>
+                
                 {{ slotProps.date }}
+
+                <span class="hidden md:block md:text-xl">
+                  {{ dayEmojisByDate.get(slotProps.date) ?? '' }}
+                </span>
               </p>
 
               <!-- affichage des tâches (todos) créées uniquement pour les jours associés -->

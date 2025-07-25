@@ -55,7 +55,7 @@ const closePopin = ():void => {
 
   @media (min-width: 960px) {
     width: 450px;
-    height: calc(100vh - 400px);
+    height: calc(100vh - 300px);
   }
 }
 

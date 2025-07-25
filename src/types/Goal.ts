@@ -3,5 +3,6 @@ export interface Goal {
     id: string,
     goal: string,
     month: number,
-    year: number
+    year: number,
+    tags?: string[]
 }
