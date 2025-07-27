@@ -33,8 +33,8 @@ const toggleShowMultipleDropdown = () => {
     <div v-show="showMultipleDropdown" class="dropdown-overlay" @click="toggleShowMultipleDropdown"></div>
     <div v-show="showMultipleDropdown" class="dropdown">
       <h3 class="border-b-1 border-b-gray-300 border-b-solid mb-2">Date d'échéance</h3>
-      <button type="button" class="w-[100%] text-left my-1" @click="onUpdate('nextDay')">Demain</button>
-      <button type="button" class="w-[100%] text-left my-1" @click="onUpdate('twoNextDay')">Après demain</button>
+      <button type="button" class="w-[100%] text-left" @click="onUpdate('nextDay')">Demain</button>
+      <button type="button" class="w-[100%] text-left" @click="onUpdate('twoNextDay')">Après demain</button>
 
       <!-- Bouton icon calendrier -->
       <form>

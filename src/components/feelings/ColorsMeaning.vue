@@ -46,38 +46,41 @@ const showFormFn = (type: string, data: Colors = null): void => {
 
 <template>
   <!-- md:flex md:flex-col items-start md:flex-wrap -->
-  <div class="relative mt-[50px] md:max-w-[30%] md:flex md:flex-row-reverse items-start">
-    <button title="Tout modifier" class="color_icon --full-update" @click="showFormFn('all')" >
-      <span>
-        Modifier tout
-      </span>
+  <section class=" md:max-w-[26%]  mt-[50px]">
+    <h3 class="title-h3 mb-5">Colors reference</h3>
+      <button class="color_icon --full-update" @click="showFormFn('all')" title="Tout modifier" >
+        <span>
+          Modifier tout
+        </span>
 
-      <Pencil class="svg"/>
-    </button>
+        <Pencil class="svg"/>
+      </button>
+    <div class="relative md:flex md:flex-row-reverse items-start">
 
-    <ul class="color_list">
-      <li class="color_item" v-for="(color, colorIndex) of colorsData" :key="colorIndex">
+      <ul class="color_list">
+        <li class="color_item" v-for="(color, colorIndex) of colorsData" :key="colorIndex">
 
-        <div class="color_block" :class="color.color">
-          <span title="Modifier" class="hidden md:block">
-            <Pencil class="svg" @click="showFormFn('one', color)" />
-          </span>
-        </div>
+          <div class="color_block" :class="color.color">
+            <span title="Modifier" class="hidden md:block">
+              <Pencil class="svg" @click="showFormFn('one', color)" />
+            </span>
+          </div>
 
-        <div class="color_meaning">
-          {{ color.color }} : {{ color.meaning }}
-        </div>
+          <div class="color_meaning">
+            {{ color.color }} : {{ color.meaning }} ({{ color.point }} point)
+          </div>
 
-      </li>
-    </ul>
+        </li>
+      </ul>
 
-    <Transition name="slide-fade">
-      <Popin v-if="showPopin" v-model="showPopin">
-        <!-- Créer le form d'update -->
-        <ColorsForm :colors="colorSelected" :formType="formType" v-model="showPopin" />
-      </Popin>
-    </Transition>
-  </div>
+      <Transition name="slide-fade">
+        <Popin v-if="showPopin" v-model="showPopin">
+          <!-- Créer le form d'update -->
+          <ColorsForm :colors="colorSelected" :formType="formType" v-model="showPopin" />
+        </Popin>
+      </Transition>
+    </div>
+  </section>
 </template>
 
 <style scoped lang="scss">
@@ -121,11 +124,11 @@ const showFormFn = (type: string, data: Colors = null): void => {
     margin-right: 10px;
     border-radius: 50%;
   
-    @media (min-width: 960px) {
-      min-width: 20px;
-      width: 20px;
-      height: 20px;
-    }
+    // @media (min-width: 960px) {
+    //   min-width: 20px;
+    //   width: 20px;
+    //   height: 20px;
+    // }
   }
   .color_meaning {
     font-size: 12px;

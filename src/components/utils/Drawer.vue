@@ -32,8 +32,12 @@ const showDrawerFn = ():void => {
   background-color: #fff;
   transition: .6s ease;
 
+  @media (min-width: 768px) {
+    right: -50%;
+    width: 50%;
+  }
+
   @media (min-width: 1024px) {
-    right: -40%;
     width: 33%;
   }
 

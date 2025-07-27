@@ -5,7 +5,7 @@ import Moon from '@/assets/svg/moon.svg?component'
 import Sun from '@/assets/svg/sun.svg?component'
 import Drawner from '@/components/utils/Drawer.vue'
 import DailyCurrentRoutine from '@/components/feelings/DailyCurrentRoutine.vue'
-import Form from '@/components/utils/Form.vue'
+import DailyMomentsForm from '@/components/utils/DailyMomentsForm.vue'
 import DailyDayName from '@/components/feelings/DailyDayName.vue'
 import { useColorStore } from '@/stores/colorStore'
 import { useDayNoteStore } from '@/stores/dayNoteStore'
@@ -57,7 +57,20 @@ const findDayNote = async (daySelected: Day) => await useDayNoteStore().findOne(
 
 onMounted(() => findDayNote(props.daySelected))
 
-const currentRoutines = computed((): CurrentRoutine[] => currentRoutinesStore.items.filter(item => item.date === dayNote.value.date && item.month === dayNote.value.month && item.year === dayNote.value.year ))
+const currentRoutines = computed((): CurrentRoutine[] =>
+  currentRoutinesStore.items.filter((item: CurrentRoutine) =>
+    item.date === dayNote.value.date && item.month === dayNote.value.month && item.year === dayNote.value.year
+  )
+)
+const currentRoutinesDone = computed((): CurrentRoutine[] =>
+  currentRoutines.value.filter((item: CurrentRoutine) =>
+    item.done
+  )
+)
+
+const allTasksDone = computed((): boolean =>
+  currentRoutinesDone.value.length === currentRoutines.value.length
+)
 
 const store = useColorStore()
 store.loadColors()
@@ -100,12 +113,18 @@ const showDrawerFn = () => {
     <!-- Entête -->
     <DailyDayName :daySelected="dateSelected" @update="updateDailyDate"/>
 
-    <button @click="showDrawerFn" class="">
-      {{ currentRoutines.length }} Tâche(s) pour ce jour
+    
+    <button @click="showDrawerFn" class="mt-2 mb-3">
+      <span v-if="!allTasksDone" class="text-red-500">
+        {{ currentRoutinesDone.length }} tâche(s) faite(s) / {{ currentRoutines.length }} restantes
+      </span>
+      <span v-else class="text-green-500 inline-block text-left">
+        Félicitation ! Tu as réalisé toutes tes tâches de ta journée. Tu peux être fier de toi 💪 !
+      </span>
     </button>
 
     <!-- Moments de la journée colorés: morning, afternoon, night -->
-    <div class="mt-10" v-for="(moment, momentIndex) in dayNote.moments" :key="momentIndex">
+    <div class="mb-10" v-for="(moment, momentIndex) in dayNote.moments" :key="momentIndex">
       <section class="flex items-center cursor-pointer" @click="showFormFn(moment.moment)" title="Modifier">
         <Sunrise v-if="moment.moment === 'morning'" class="moment-svg morning border-1 border-solid border-[moment.color]" :style="{borderColor: moment.color}" />
         <Sun v-if="moment.moment === 'afternoon'" class="moment-svg afternoon border-1 border-solid" :style="{borderColor: moment.color}" />
@@ -128,14 +147,14 @@ const showDrawerFn = () => {
         </div>
       </section>
       
-      <pre v-if="moment.content"  class="whitespace-pre-line text-sm font-[inherit] mt-3">
+      <pre v-if="moment.content" class="whitespace-pre-line text-sm font-[inherit] mt-3">
         {{ moment.content }}
       </pre>
       <p v-else>...</p>
 
       <Teleport to=".popin-content">
         <Transition name="slide-fade">
-          <Form v-if="showForm && formSection === moment.moment" v-model="showForm" :itemId="dayNote.id || '-1'" :moment="moment" :day="{ id: dayNote.id || '-1', date: dayNote.date, month: dayNote.month, year: dayNote.year }" @create="updateData" />
+          <DailyMomentsForm v-if="showForm && formSection === moment.moment" v-model="showForm" :itemId="dayNote.id || '-1'" :moment="moment" :day="{ id: dayNote.id || '-1', date: dayNote.date, month: dayNote.month, year: dayNote.year }" @create="updateData" />
         </Transition>
       </Teleport>
     </div>

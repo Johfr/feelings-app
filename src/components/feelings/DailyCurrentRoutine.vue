@@ -22,8 +22,8 @@ recurrentRoutinesStore.loadRoutines()
 const recurrentRoutines = computed((): RecurrentRoutine[] => recurrentRoutinesStore.items)
 
 const props = defineProps<{
-  routines: CurrentRoutine[],
   daySelected: Day,
+  routines: CurrentRoutine[],
   title?: string,
   asCheckBox?: boolean
 }>()
@@ -258,18 +258,18 @@ const pourRecurrentRoutines = async () => {
           <div v-show="openedDropdownId === routine.id" class="dropdown-overlay" @click="openedDropdownId = null"></div>
           <div v-show="openedDropdownId === routine.id" class="dropdown">
             <h3 class="border-b-1 border-b-gray-300 border-b-solid mb-2">Date d'échéance</h3>
-            <button type="button" class="w-[100%] text-left my-1" @click="updateRoutineDate(routine, 'nextDay')">Demain</button>
-            <button type="button" class="w-[100%] text-left my-1" @click="updateRoutineDate(routine, 'twoNextDay')">Après demain</button>
+            <button type="button" class="w-[100%] text-left" @click="updateRoutineDate(routine, 'nextDay')">Demain</button>
+            <button type="button" class="w-[100%] text-left" @click="updateRoutineDate(routine, 'twoNextDay')">Après demain</button>
 
             <!-- Bouton icon calendrier -->
             <form>
-              <label for="date-picker2" class="button block w-[100%] relative text-left">
+              <label :for="'date-picker' + routine.id" class="button block w-[100%] relative text-left">
                 <span>
                   Une date spécifique
                   <ArrowIcon class="svg"/>
                 </span>
 
-                <input id="date-picker2" type="date" @change="formatDate">
+                <input :id="'date-picker' + routine.id" type="date" @change="formatDate">
               </label>
             </form>
 

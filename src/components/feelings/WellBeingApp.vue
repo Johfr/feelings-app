@@ -3,14 +3,19 @@ import CalendarMonthsTotalDays from '@/components/feelings/CalendarMonthsTotalDa
 import DailyRecurrentRoutine from '@/components/feelings/DailyRecurrentRoutine.vue'
 import CalendarMomentsColor from '@/components/feelings/CalendarMomentsColor.vue'
 import DailyCurrentRoutine from '@/components/feelings/DailyCurrentRoutine.vue'
-import MonthTendence from '@/components/feelings/MonthTendence.vue'
+import StatsMonthlyDoneTasks from '@/components/feelings/StatsMonthlyDoneTasks.vue'
+import EmojisConcordance from '@/components/feelings/EmojisConcordance.vue'
+import MonthGoalTags from '@/components/feelings/MonthGoalTags.vue'
+import StatsMonthTendence from '@/components/feelings/StatsMonthTendence.vue'
 import ColorsMeaning from '@/components/feelings/ColorsMeaning.vue'
 import DailyDayName from '@/components/feelings/DailyDayName.vue'
 import DailyMoments from '@/components/feelings/DailyMoments.vue'
 import MonthGoal from '@/components/feelings/MonthGoal.vue'
 import MonthName from '@/components/feelings/MonthName.vue'
 import BackButton from '@/components/utils/BackButton.vue'
+import StepForm from '@/components/utils/StepForm.vue'
 import Drawner from '@/components/utils/Drawer.vue'
+import Navbar from '@/components/utils/Navbar.vue'
 // import Popin from '@/components/utils/Popin.vue'
 import { useMonthName, useMonthNumber, useCurrentDay, useDayNumber, useCurrentDate, useCurrentMonth, useCurrentYear } from '@/composables/useDate'
 import { useEmoji } from '@/composables/useEmoji'
@@ -18,13 +23,10 @@ import { useRecurrentRoutineStore } from '@/stores/recurrentRoutineStore'
 import { useCurrentRoutineStore } from '@/stores/currentRoutineStore'
 import { useDayNoteStore } from '@/stores/dayNoteStore'
 import { RecurrentRoutine } from '@/types/RecurrentRoutine'
-import DailyTasksRemaining from './DailyTasksRemaining.vue'
 import { CurrentRoutine } from '@/types/CurrentRoutine'
+import { FormQuestion } from '@/types/FormQuestion'
 import { DayNote } from '@/types/DayNote'
 import { Day } from '@/types/Day'
-import { FormQuestion } from '@/types/FormQuestion'
-import StepForm from '@/components/utils/StepForm.vue'
-import MonthGoalTags from './MonthGoalTags.vue'
 
 
 const currentRoutinesStore = useCurrentRoutineStore()
@@ -52,17 +54,29 @@ const routeMonth = computed(() => route.params.month as string)
 const routeMonthNumber = computed((): number  => useMonthNumber(routeMonth.value))
 const routeYear = computed(() => route.params.year as string)
 const routeYearNumber = computed(() => Number(routeYear.value))
-
-// retourne uniquement les routines du mois affiché
-const currentMonthlyRoutines = computed((): CurrentRoutine[] => currentRoutinesStore.items.filter(routine => routine.month === routeMonthNumber.value && routine.year === routeYearNumber.value) )
-const currentDailyRoutines = computed((): CurrentRoutine[] => currentRoutinesStore.items.filter(routine => routine.date === daySelected.value.date && routine.month === routeMonthNumber.value && routine.year === routeYearNumber.value) )
-
 const daySelected = ref<Day>()
 const showPopin = ref<boolean>(false)
+
+// retourne uniquement les routines du mois affiché
+const currentMonthlyRoutines = computed((): CurrentRoutine[] => 
+  currentRoutinesStore.items.filter((routine: CurrentRoutine) =>
+    routine.month === routeMonthNumber.value
+    && routine.year === routeYearNumber.value
+  )
+)
+
+const currentDailyRoutines = computed((): CurrentRoutine[] => 
+  currentRoutinesStore.items.filter((routine: CurrentRoutine) => 
+    routine.date === daySelected.value.date
+    && routine.month === daySelected.value.month
+    && routine.year === daySelected.value.year
+  )
+)
 
 const emojiValueMap = new Map<string, number>(
   useEmoji.map(({ icon, value }) => [icon, value])
 )
+
 const dayEmojisStats = computed(() => {
   let totalPositive = 0
   let totalNegative = 0
@@ -129,8 +143,8 @@ const momentStats = computed(() => {
     }
   })
 
+  // refactor
   // const formatted = {} as Record<string, Record<'positive' | 'neutral' | 'negative', { number: number, days: number[] }>>
-
   // for (const moment of ['morning', 'afternoon', 'night']) {
   //   formatted[moment] = {
   //     positive: { number: result[moment].positive.length, days: result[moment].positive },
@@ -187,7 +201,6 @@ const momentStats = computed(() => {
   }
 })
 
-
 // calcule les points de la journée en fonction de l'humeur et retourne l'émoji associé
 const dayEmojisByDate = computed(() => {
   const result = new Map<number, string>()
@@ -214,47 +227,6 @@ const dayEmojisByDate = computed(() => {
   return result
 })
 
-
-
-// let colorMonthCount = ref(0)
-// let daysHumor = ref([])
-// const totalDays = 31
-// // calcule les points de la journée en fonction de l'humeur et retourne l'émoji associé
-// const dayPointsCount = (dayNumber: number): {date: Number, icon: string} | null => {
-//   console.log(dayNumber);
-//   const itemsFound = noteStore.dayNoteItems.find(item => {
-//     if (item.month === useMonthNumber(routeMonth.value) && item.year === routeYearNumber.value && item.date === dayNumber) {
-//       return item
-//     }
-//   })
-
-//   let itemDate = 0
-//   let colorCount = 0
-//   let asColorPoints = false
-
-//   if (!itemsFound) return
-
-//   itemsFound?.moments.map(moment => {
-//     if (moment?.colorPoint) {
-//       colorCount += moment?.colorPoint
-//       itemDate = itemsFound.date
-      
-//       colorMonthCount.value += moment?.colorPoint
-//       asColorPoints = true
-//     }
-//   })
-
-//   asColorPoints ? daysHumor.value.push({
-//     date: itemDate,
-//     icon: useEmoji.find(emoji => emoji.value === colorCount).icon
-//   }) : null
-// }
-// for(let dayNumber = 1; dayNumber <= totalDays; dayNumber++) {
-//   dayPointsCount(dayNumber)
-// }
-
-
-
 const showPopinFn = ():void => {
   showPopin.value = !showPopin.value
 }
@@ -273,8 +245,8 @@ const openPopin = (date: number, month: number, year: number):void => {
 }
 
 const openCurrentRoutine = (date: number, month: number, year: number):void => {
-  showCurrentDrawerFn()
-  updateDailyDate({ date, month, year })
+  showCurrentDrawerFn()  
+  updateDailyDate({ date: useCurrentDate, month: useCurrentMonth, year: useCurrentYear })
 }
 
 const updateDailyDate = async (dateUpdated: { date: number, month: number, year: number }) => {
@@ -324,6 +296,19 @@ const time = computed(() => {
 
   return { hour, minutes, secondes }
 })
+
+const showMonthTags = ref<boolean>(false)
+const toggleMonthTags = ():void => {
+  showMonthTags.value = !showMonthTags.value
+}
+const showMonthTarget = ref<boolean>(false)
+const toggleMonthTarget = ():void => {  
+  showMonthTarget.value = !showMonthTarget.value
+}
+const showMonthTrends = ref<boolean>(false)
+const toggleMonthTrends = ():void => {  
+  showMonthTrends.value = !showMonthTrends.value
+}
 </script>
 
 <template>
@@ -337,6 +322,10 @@ const time = computed(() => {
   <!-- Un calcule des couleurs s'affichent avec le pourcentage pour chaque couleur -->
   <!-- 3 pictos par moments : matin: levé de soleil / nuageux, midi: gros soleil / nuageux, soir : demie lune + étoile / nuageux -->
   <!-- Passer les routines done en fin de liste -->
+  <!-- Rajout de chatGpt pour l'analyse des réponses (journalier, mensuel => premium) -->
+  <!-- Rajout des 3 moments/evenements/situation positive de la journée et du pourquoi elles le sont  -->
+  <!-- Trouver un moyen d'implémenter un concept sur les intuitions et pourquoi les suivre -->
+  <!-- Enfin, intégrer les notions d'ancrages : les choses stables qui apportent la paix et qui rassure quotidiennement -->
    <div class="month-container" :class="{fade : showPopin}">
     <BackButton routeName="year" :btnText="'Retour'" />
     
@@ -359,15 +348,18 @@ const time = computed(() => {
     <MonthName :routeMonth="routeMonth" :routeYear="routeYearNumber" />
 
     <!-- Tâches restantes  -->
-    <DailyTasksRemaining :actifMonth="routeMonth" :actifMonthNumber="routeMonthNumber" :actifYear="routeYearNumber" @openpopin="openCurrentRoutine"/>
+    <Navbar @showMonthTags="toggleMonthTags" @showMonthTarget="toggleMonthTarget" @showMonthTasks="openCurrentRoutine" @showMonthTrends="toggleMonthTrends" />
+    <MonthGoalTags :routeMonthNumber="routeMonthNumber" :routeYear="routeYearNumber" v-model:showMonthTags="showMonthTags" />
+    <MonthGoal :routeMonthNumber="routeMonthNumber" :routeYear="routeYearNumber" v-model:showMonthTarget="showMonthTarget" />
+    <StatsMonthTendence :month="routeMonth" :year="routeYearNumber" v-model:showMonthTrends="showMonthTrends" />
 
-    <MonthTendence :month="routeMonth" :year="routeYearNumber" />
+    <!-- <StatsMonthlyDoneTasks :actifMonth="routeMonth" :actifMonthNumber="routeMonthNumber" :actifYear="routeYearNumber" /> -->
+
+    <div class="md:flex md:justify-between md:gap-5">
+      <!-- Colors meaning -->
+      <ColorsMeaning />
       
-    <MonthGoal :routeMonthNumber="routeMonthNumber" :routeYear="routeYearNumber" />
-    <!-- <MonthGoalTags :routeMonthNumber="routeMonthNumber" :routeYear="routeYearNumber" /> -->
-    
-    <!-- Calendrier -->
-     <div class="md:flex md:justify-between md:gap-10">
+      <!-- Calendrier -->
       <CalendarMonthsTotalDays :month="routeMonthNumber" :yearNumber="routeYearNumber">
         <template v-slot:item="slotProps">
           <!-- <div v-if="(routeMonthNumber < useCurrentMonth || (slotProps.date < useCurrentDate && routeMonthNumber === useCurrentMonth))" class="day_finished right hidden md:block" />
@@ -425,7 +417,8 @@ const time = computed(() => {
         </template>
       </CalendarMonthsTotalDays>
 
-      <ColorsMeaning />
+      <!-- Emoji -->
+      <EmojisConcordance />
     </div>
 
     <Drawner v-model="showRecurrentDrawer">
@@ -438,14 +431,6 @@ const time = computed(() => {
       />
     </Drawner>
   </div>
-
-  <!-- <Transition name="slide-fade">
-    <Popin v-if="showPopin" v-model="showPopin">
-      <div class="popin-content">
-        <DailyMoments :daySelected="daySelected"/>
-      </div>
-    </Popin>
-  </Transition> -->
   
   <!-- Daily moments -->
   <Teleport to="#app">
@@ -465,7 +450,7 @@ const time = computed(() => {
         :daySelected="daySelected"
         :routines="currentDailyRoutines"
         :asCheckBox="true"
-        >
+      >
         <template #title>
           <h2 class="title-h2">
             <DailyDayName :daySelected="daySelected" @update="updateDailyDate"/>

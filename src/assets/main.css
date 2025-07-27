@@ -147,6 +147,10 @@ button, .button {
   padding: 0;
 }
 
+/* pre { 
+  max-height: 138px;
+  overflow: hidden;
+} */
 /* section {
   padding: 24px;
 

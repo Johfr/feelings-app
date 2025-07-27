@@ -10,7 +10,7 @@ const sortedEmoji = useEmoji.sort((a,b) => b.value - a.value)
     <table class="w-[100%] text-center">
       <thead>
         <tr>
-          <th class="font-medium">Valeur</th>
+          <th class="font-medium">Valeurs</th>
           <th class="font-medium">Emojis</th>
         </tr>
       </thead>

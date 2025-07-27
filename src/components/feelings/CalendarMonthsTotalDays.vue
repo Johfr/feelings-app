@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { useDaysInMonth, useCurrentDate } from '@/composables/useDate'
+import { useDaysInMonth, useCurrentDate, useCurrentMonth, useCurrentYear } from '@/composables/useDate'
 
 const props = defineProps<{
   month: number,
   yearNumber: number,
 }>()
+
+const route = useRoute()
 
 const totalMonthDays = computed(() => useDaysInMonth(props.month, props.yearNumber) )
 
@@ -24,20 +26,24 @@ const totalMonthDaysAdjusted = computed(() => {
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1)
   ]
 })
+
 </script>
 
 <template>
-  <ul class="day-list">
-    <li
-      v-for="(date, dayIndex) of totalMonthDaysAdjusted" :key="dayIndex"
-      class="day-item relative"
-      :class="{'md:border-1 md:border-dashed md:border-red-500': date === useCurrentDate, 'cursor-pointer' : date !== 0}"
-    >
-      <slot name="item" :date="date" />
+  <section class="w-[100%] md:max-w-[85%] mt-[50px]">
+    <h3 v-if="route.params.month" class="title-h3 mb-5">Calendar reference</h3>
+    <ul class="day-list">
+      <li
+        v-for="(date, dayIndex) of totalMonthDaysAdjusted" :key="dayIndex"
+        class="day-item relative"
+        :class="{'md:border-1 md:border-dashed md:border-red-500': date === useCurrentDate && month === useCurrentMonth && yearNumber === useCurrentYear, 'cursor-pointer' : date !== 0}"
+      >
+        <slot name="item" :date="date" />
 
-      <slot :date="date" />
-    </li>
-  </ul>
+        <slot :date="date" />
+      </li>
+    </ul>
+  </section>
 </template>
 
 <style scoped lang="scss">
@@ -45,41 +51,16 @@ const totalMonthDaysAdjusted = computed(() => {
   display: flex;
   flex-wrap: wrap;
   gap: var(--gap-10);
-  margin-top: 50px;
-  width: 100%;
-  
-  @media (min-width: 960px) {
-    max-width: 85%;
-  }
 }
 .day-item {
   display: flex;
-  // justify-content: center;
-  // align-items: center;
-  // flex-wrap: wrap;
   width: 11%;
   height: 35px;
-  // cursor: pointer;
   position: relative;
 
   @media (min-width: 768px) {
     height: 80px;
     width: 12%;
   }
-
-  @media (min-width: 960px) {
-    width: 13%;
-    height: 80px;
-    // background-color: #fff;
-  }
-
-  // &_day {
-  //   width: 100%;
-  //   height: 100%;
-  //   display: flex;
-  //   justify-content: center;
-  //   align-items: center;
-  //   font-size: 12px;
-  // }
 }
 </style>
