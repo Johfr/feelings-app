@@ -25,9 +25,9 @@ const data = computed((): DayNote[] => noteStore.dayNoteItems.filter((item: DayN
 
 const { colorStats, totalPoints, totalColors } = useColorsStats(data)
 const positiveSumCumulated = computed(() => totalPoints.value.positive + Math.abs(totalPoints.value.neutre - totalPoints.value.negative) )
-const positiveMomentsInPercent = computed(() => (totalPoints.value.positive * 100 / totalColors.value).toFixed())
-const negativeMomentsInPercent = computed(() => (totalPoints.value.negative * 100 / totalColors.value).toFixed())
-const neutreMomentsInPercent = computed(() => (totalPoints.value.neutre * 100 / totalColors.value).toFixed())
+const positiveMomentsInPercent = computed(() => totalColors.value === 0 ? '0' : (totalPoints.value.positive * 100 / totalColors.value).toFixed()) // evite de diviser /0 (NaN)
+const negativeMomentsInPercent = computed(() => totalColors.value === 0 ? '0' : (totalPoints.value.negative * 100 / totalColors.value).toFixed()) // evite de diviser /0 (NaN
+const neutreMomentsInPercent = computed(() => totalColors.value === 0 ? '0' : (totalPoints.value.neutre * 100 / totalColors.value).toFixed()) // evite de diviser /0 (NaN
 
 const monthTendency = computed(() => {
   let difficulty = (totalColors.value * 0.05) // 5% : mois neutre
@@ -40,6 +40,7 @@ const monthTendency = computed(() => {
     return 'mois négatif'
   }
 })
+console.log(totalColors.value);
 
 // const showTendence = ref<boolean>(false)
 // const tendenceButtonText = ref<string>('Tendance du mois')

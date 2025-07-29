@@ -11,7 +11,7 @@ export const useGoalStore = defineStore('goal', () => {
 
   const findOne = async (month: number, year: number): Promise<Goal> => items.value.find((item): boolean => item.year === year && item.month === month)
 
-  const updateGoal = async (itemId: string, goalUpdated: string | null, tagsUpdated: string[] | null): Promise<{ status: number; message: string }> => {
+  const updateGoal = async (itemId: string, goalUpdated: string | null, tagsUpdated: string[] | null = null): Promise<{ status: number; message: string }> => {
     const index = items.value.findIndex((item) => item.id === itemId)
     if (index === -1) return { status: 404, message: 'Item not found' }
 

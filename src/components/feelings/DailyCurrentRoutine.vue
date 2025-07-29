@@ -13,7 +13,11 @@ import Pencil from '@/assets/svg/pencil.svg?component'
 import TrashIcon from '@/assets/svg/trash.svg?component'
 import CheckIcon from '@/assets/svg/check.svg?component'
 import ArrowIcon from '@/assets/svg/arrow.svg?component'
+import { ArrowSyncCircle20Regular } from '@vicons/fluent'
+import { NIcon } from 'naive-ui'
+import { useNotification } from 'naive-ui'
 
+const notification = useNotification()
 const currentRoutinesStore = useCurrentRoutineStore()
 currentRoutinesStore.loadRoutines()
 
@@ -42,6 +46,18 @@ const specificDate = ref<{date : number, month : number, year : number}>({date: 
 const openedDropdownId = ref<string | null>(null)
 const routinesSelected = ref<CurrentRoutine[]>([])
 const showMultipleDropdown = ref<boolean>(false)
+// const runningTask = ref<string[]>([])
+
+const toggleRunningTask = async (routine: CurrentRoutine) => {
+  const previous = routine.running
+  routine.running = !previous // maj immédiate
+
+  const resp = await updateRoutine(routine)
+
+  if (resp.status !== 200) {
+    routine.running = previous
+  }
+}
 
 const toggleShowRoutineForm = (value: boolean = true): void => {
   showRoutineForm.value = value
@@ -55,9 +71,19 @@ const toggleShowMultipleRoutineConfirm = (): void => {
   showMultipleRoutineConfirm.value = !showMultipleRoutineConfirm.value
 }
 
-const toggleDone = (routine: CurrentRoutine) => {
-  routine.done = !routine.done
-  updateRoutine(routine)
+const toggleDone = async (routine: CurrentRoutine) => {
+  const previous = routine.done
+  const previousRunning = routine?.running
+
+  routine.done = !previous // maj immédiate
+  routine.running = false // maj immédiate
+
+  const resp = await updateRoutine(routine)
+
+  if (resp.status !== 200) {    
+    routine.done = previous // rollback si erreur
+    routine.running = previousRunning
+  }
 }
 
 const toggleDropdown = () => {
@@ -80,7 +106,7 @@ const resetDateForm = () => {
   specificDate.value.year = null
 }
 
-const crudRoutine = (routine: CurrentRoutine, type: string = ''): void => {
+const crudRoutine = (routine: CurrentRoutine = { id: null, date: null, month: null, year: null, title: null, done: null, type: null, running: null }, type: string = ''): void => {
   type === 'delete' ? toggleShowRoutineConfirm() : toggleShowRoutineForm()
   routineSelected.value = routine
 }
@@ -147,22 +173,51 @@ const createNewRoutine = async (routine: CurrentRoutine) => {
 
   const resp = await currentRoutinesStore.create(routine)
 
-  // if (resp.status === 201) {
-  //   toaster('ok')
-  // }
+  if (resp.status === 201) {
+    notification.success({
+      content: 'Nouvelle tâche créée',
+      duration: 3000
+    })
+  }
 }
 
 const updateRoutine = async (routine: CurrentRoutine) => {
   const resp = await currentRoutinesStore.update(routine)
+  if (resp.status === 200) {
+    toggleDropdown()
+    resetDateForm()
+    notification.success({
+      content: 'Tâche mise à jour',
+      duration: 3000
+    })
+  } else {
+    notification.warning({
+      content: 'Une erreur est survenue',
+      duration: 3000,
+      closable: true
+    })
+  }
 
-  toggleDropdown()
-  resetDateForm()
+  return resp
 }
 
 const deleteRoutine = async (routineSelected: CurrentRoutine) => {
   const resp = await currentRoutinesStore.delete(routineSelected.id)
-  currentRoutinesStore.removeRoutinesByIds([routineSelected.id])
-  resetDateForm()
+
+  if (resp.status === 200) {
+    currentRoutinesStore.removeRoutinesByIds([routineSelected.id])
+    resetDateForm()
+    notification.success({
+      content: 'Tâche supprimé avec succès !',
+      duration: 3000
+    })
+  } else {
+    notification.warning({
+      content: 'Une erreur est survenue',
+      duration: 3000,
+      closable: true
+    })
+  }
 }
 
 const deletMultipleRoutine = async () => {
@@ -190,9 +245,10 @@ const pourRecurrentRoutines = async () => {
     <slot name="title"></slot>
     
     <slot name="cta"></slot>
+
     <button @click="pourRecurrentRoutines">Importer les routines récurrentes</button>
 
-    <button type="button" @click="crudRoutine({ id: null, date: null, month: null, year: null, title: null, done: null, type: null })">
+    <button type="button" @click="crudRoutine()">
       Ajouter une tâche
     </button>
 
@@ -236,7 +292,7 @@ const pourRecurrentRoutines = async () => {
             />
 
             <pre
-              class="whitespace-pre-line text-sm font-[inherit] cursor-pointer"
+              class="flex items-center whitespace-normal text-sm font-[inherit] cursor-pointer"
               :class="{
                 'done': (routine.done && routine.title.split('').length <= 50),
                 'line-through decoration-black': (routine.done && routine.title.split('').length > 50)
@@ -244,11 +300,19 @@ const pourRecurrentRoutines = async () => {
               @click="crudRoutine(routine)"
               title="cliquer pour Modifier"
             >
-              {{ routine.title }}
+              <n-icon v-if="routine?.running && !routine.done" class="mr-2 text-blue-500 animate-spin" size="20" title="Passer en cours...">
+                <ArrowSyncCircle20Regular />
+              </n-icon>
+              <span :class="{'text-blue-500': routine.running}">
+                {{ routine.title }}
+              </span>
             </pre>
           </div>
 
           <div class="cta-container flex items-center justify-end md:opacity-0">
+            <n-icon v-if="!routine.done" @click="toggleRunningTask(routine)" class="mr-2 cursor-pointer" :class="{'text-blue-500 animate-spin': routine?.running}" size="20" title="Passer en cours...">
+              <ArrowSyncCircle20Regular />
+            </n-icon>
             <CheckIcon class="svg mr-3" :class="{ 'fill-indigo-600': routine.done }" @click="toggleDone(routine)" title="Done"/>
             <Pencil class="svg mr-3" @click="crudRoutine(routine)" title="modifier"/>
             <TrashIcon class="svg mr-3" @click="crudRoutine(routine, 'delete')" title="supprimer"/>

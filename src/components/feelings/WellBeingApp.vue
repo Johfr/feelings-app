@@ -27,6 +27,7 @@ import { CurrentRoutine } from '@/types/CurrentRoutine'
 import { FormQuestion } from '@/types/FormQuestion'
 import { DayNote } from '@/types/DayNote'
 import { Day } from '@/types/Day'
+import { NDivider } from 'naive-ui'
 
 
 const currentRoutinesStore = useCurrentRoutineStore()
@@ -322,7 +323,10 @@ const toggleMonthTrends = ():void => {
   <!-- Un calcule des couleurs s'affichent avec le pourcentage pour chaque couleur -->
   <!-- 3 pictos par moments : matin: levé de soleil / nuageux, midi: gros soleil / nuageux, soir : demie lune + étoile / nuageux -->
   <!-- Passer les routines done en fin de liste -->
-  <!-- Rajout de chatGpt pour l'analyse des réponses (journalier, mensuel => premium) -->
+  <!-- Rajout de chatGpt pour l'analyse des réponses (journalier, mensuel => premium)
+    sous chaque moment: rajouter un bouton "conseil" qui génèrera un conseil au user. Possible de choisir le type de conseil souhaité
+    Si les 3 moments sont renseignés : Un bouton analyse de la journée
+  -->
   <!-- Rajout des 3 moments/evenements/situation positive de la journée et du pourquoi elles le sont  -->
   <!-- Trouver un moyen d'implémenter un concept sur les intuitions et pourquoi les suivre -->
   <!-- Enfin, intégrer les notions d'ancrages : les choses stables qui apportent la paix et qui rassure quotidiennement -->
@@ -349,6 +353,7 @@ const toggleMonthTrends = ():void => {
 
     <!-- Tâches restantes  -->
     <Navbar @showMonthTags="toggleMonthTags" @showMonthTarget="toggleMonthTarget" @showMonthTasks="openCurrentRoutine" @showMonthTrends="toggleMonthTrends" />
+    <n-divider />
     <MonthGoalTags :routeMonthNumber="routeMonthNumber" :routeYear="routeYearNumber" v-model:showMonthTags="showMonthTags" />
     <MonthGoal :routeMonthNumber="routeMonthNumber" :routeYear="routeYearNumber" v-model:showMonthTarget="showMonthTarget" />
     <StatsMonthTendence :month="routeMonth" :year="routeYearNumber" v-model:showMonthTrends="showMonthTrends" />

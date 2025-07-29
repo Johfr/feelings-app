@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Navbar from '@/components/rgaa/navbar.vue'
+import { NNotificationProvider } from 'naive-ui'
 
 const setHour = () => {
   const hour = new Date().getHours()
@@ -21,7 +22,9 @@ onMounted(() => setHour())
 </script>
 
 <template>
+  <n-notification-provider placement='top-left'>
   <RouterView />
+  </n-notification-provider>
 </template>
 
 <style scoped>

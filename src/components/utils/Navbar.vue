@@ -1,13 +1,31 @@
 <script setup lang="ts">
 import { useCurrentDate, useCurrentMonth, useMonthName, useCurrentYear } from '@/composables/useDate'
 import { useCurrentRoutineStore } from '@/stores/currentRoutineStore'
+// import { useGoalStore } from '@/stores/goalStore'
 import { CurrentRoutine } from '@/types/CurrentRoutine'
-import { TargetArrow24Regular, DataArea24Filled, DataArea20Regular, DataTrending16Regular } from '@vicons/fluent'
+import { TargetArrow24Regular, DataArea24Filled, DataArea20Regular, DataTrending16Regular, ArrowSyncCircle20Regular } from '@vicons/fluent'
 import { UserAvatarFilledAlt, TaskSettings } from '@vicons/carbon'
 import { NBadge, NFloatButton, NIcon } from 'naive-ui'
 
+
 const currentRoutinesStore = useCurrentRoutineStore()
 currentRoutinesStore.loadRoutines()
+
+const currentRunningTaskExists = ref<CurrentRoutine[] | null>(null)
+const hasCurrentRunningTask = ref()
+
+watchEffect(async () => {
+  const runningTasks = await currentRoutinesStore.findCurrentRunningTask(
+    useCurrentDate,
+    useCurrentMonth,
+    useCurrentYear
+  )
+
+  currentRunningTaskExists.value = runningTasks
+  
+  hasCurrentRunningTask.value = runningTasks?.length > 0  
+})
+
 
 const currentRoutineLeft = computed((): CurrentRoutine[] => currentRoutinesStore.items.filter(routine => {
   if (routine.date === useCurrentDate && routine.month === useCurrentMonth && routine.year === useCurrentYear) {
@@ -56,8 +74,25 @@ const toggleMonthTrends = ():void => {
         </n-icon>
       </n-badge>
     </n-float-button>
+      
+    <n-float-button v-if="hasCurrentRunningTask" position="relative" title="tâche en cours" @click="toggleMonthTasks">
+      <n-badge processing :offset="[8, -8]" color="transparent">
+        
+        <n-icon>
+          <TaskSettings />
+        </n-icon>
 
-    <n-float-button position="relative" title="tâche en cours" @click="toggleMonthTasks">
+        <template #value>
+           <!-- v-if="true" class="text-blue-500 animate-spin" -->
+          <n-icon color="blue" size="20" class=" animate-spin">
+            <ArrowSyncCircle20Regular />
+          </n-icon>
+        
+        </template>
+      </n-badge>
+    </n-float-button>
+
+    <n-float-button v-else position="relative" title="tâche en cours" @click="toggleMonthTasks">
       <n-badge :value="currentRoutineLeft.length" :offset="[8, -8]">
         <n-icon>
           <TaskSettings />

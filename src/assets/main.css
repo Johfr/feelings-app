@@ -47,7 +47,7 @@ body {
   width: 100%;
   /* max-width: 1024px; */
   max-width: 1160px;
-  height: 100vh;
+  min-height: 100vh;
   margin: 0 auto 150px;
 }
 
@@ -66,9 +66,9 @@ code {
 .main {
   padding: 20px;
   /* background-color: #fff; */
-  @media (min-width: 1024px) {
+  /* @media (min-width: 1024px) {
     padding-top: 120px;
-  }
+  } */
 }
 
 .title-h1 {

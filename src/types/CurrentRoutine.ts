@@ -6,5 +6,7 @@ export interface CurrentRoutine {
     year: number,
     title: string,
     done: boolean,
-    type: string
+    type: string,
+    tags?: string[],
+    running?: boolean
 }

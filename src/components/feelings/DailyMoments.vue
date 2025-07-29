@@ -67,9 +67,14 @@ const currentRoutinesDone = computed((): CurrentRoutine[] =>
     item.done
   )
 )
+const currentRoutinesRunning = computed((): CurrentRoutine[] =>
+  currentRoutines.value.filter((item: CurrentRoutine) =>
+    item.running
+  )
+)
 
 const allTasksDone = computed((): boolean =>
-  currentRoutinesDone.value.length === currentRoutines.value.length
+  currentRoutines.value.length > 0 && currentRoutinesDone.value.length === currentRoutines.value.length
 )
 
 const store = useColorStore()
@@ -115,9 +120,22 @@ const showDrawerFn = () => {
 
     
     <button @click="showDrawerFn" class="mt-2 mb-3">
-      <span v-if="!allTasksDone" class="text-red-500">
-        {{ currentRoutinesDone.length }} tâche(s) faite(s) / {{ currentRoutines.length }} restantes
+      <span v-if="currentRoutines.length === 0" class="text-red-500">
+        Créer une tâche
       </span>
+
+      <span v-else-if="!allTasksDone" class="text-blue-500 text-left" title="voir tout">
+        <span class="block">
+          {{ currentRoutinesDone.length }} {{ currentRoutinesDone.length > 1 ? 'tâches' : 'tâche' }} {{ currentRoutinesDone.length > 1 ? 'faites' : 'faite' }}
+        </span>
+        <span class="block">
+          {{ currentRoutinesRunning.length }} en cours
+        </span>
+        <span class="block">
+          {{ currentRoutines.length }} restantes
+        </span>
+      </span>
+
       <span v-else class="text-green-500 inline-block text-left">
         Félicitation ! Tu as réalisé toutes tes tâches de ta journée. Tu peux être fier de toi 💪 !
       </span>
