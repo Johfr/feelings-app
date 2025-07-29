@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { useCurrentDate, useCurrentMonth, useMonthName, useCurrentYear } from '@/composables/useDate'
 import { useCurrentRoutineStore } from '@/stores/currentRoutineStore'
-// import { useGoalStore } from '@/stores/goalStore'
 import { CurrentRoutine } from '@/types/CurrentRoutine'
-import { TargetArrow24Regular, DataArea24Filled, DataArea20Regular, DataTrending16Regular, ArrowSyncCircle20Regular } from '@vicons/fluent'
+import { TargetArrow24Regular, DataTrending16Regular, ArrowSyncCircle20Regular } from '@vicons/fluent'
 import { UserAvatarFilledAlt, TaskSettings } from '@vicons/carbon'
 import { NBadge, NFloatButton, NIcon } from 'naive-ui'
 

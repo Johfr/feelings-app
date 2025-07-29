@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import RoutineForm from '@/components/utils/RoutineForm.vue'
+import TitleForm from '@/components/utils/TitleForm.vue'
 import { RecurrentRoutine } from '@/types/RecurrentRoutine'
 import ConfirmBox from '@/components/utils/ConfirmBox.vue'
 
@@ -22,19 +22,20 @@ const showRoutineConfirmFn = (): void => {
   showRoutineConfirm.value = !showRoutineConfirm.value
 }
 
-const crudRoutine = (routine: RecurrentRoutine, type: string = ''): void => {
+const crudRoutine = (routine: RecurrentRoutine = { id: null, title: null, done: null, type: null }, type: string = ''): void => {
   type === 'delete' ? showRoutineConfirmFn() : showRoutineFormFn()
   routineSelected.value = routine
 }
 
 const emit = defineEmits(['create', 'update', 'confirm'])
+
 // CRUD RECURRENT STORE
-const createNewRoutine = async (newRoutine: string) => {
-  emit('create', {...routineSelected.value, title: newRoutine})
+const createNewRoutine = async (newTitle: string) => {
+  emit('create', {...routineSelected.value, title: newTitle})
 }
 
-const updateRoutine = async (routine: RecurrentRoutine) => {
-  emit('update', routine)
+const updateRoutine = async (newTitle: string) => {
+  emit('update', {...routineSelected.value, title: newTitle})
 }
 
 const deleteRoutine = async () => {
@@ -49,7 +50,7 @@ const deleteRoutine = async () => {
     <h2 class="title-h2">{{ title }}</h2>
     <slot name="title"></slot>
 
-    <button type="button" @click="crudRoutine({ id: null, title: null, done: null, type: null })">
+    <button type="button" @click="crudRoutine()">
       Ajouter une tâche
     </button>
 
@@ -64,7 +65,15 @@ const deleteRoutine = async () => {
     </label>
 
     <Transition name="slide-fade">
-      <RoutineForm v-if="showRoutineForm" v-model="showRoutineForm" title="Créer une nouvelle tâche" :routineSelected="routineSelected" @create="createNewRoutine" @update="updateRoutine" />
+      <TitleForm
+        v-if="showRoutineForm"
+        v-model="showRoutineForm"
+        formTitle="Créer une nouvelle tâche"
+        :itemId="routineSelected.id"
+        :itemTitle="routineSelected.title"
+        @create="createNewRoutine"
+        @update="updateRoutine"
+      />
     </Transition>
 
     <Transition name="slide-fade">

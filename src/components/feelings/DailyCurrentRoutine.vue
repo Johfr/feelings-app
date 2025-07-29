@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { usePreviousNextDate, useMonthName } from '@/composables/useDate'
 import DailyDropdownDueDate from '@/components/feelings/DailyDropdownDueDate.vue'
-import RoutineForm from '@/components/utils/RoutineForm.vue'
+import TitleForm from '@/components/utils/TitleForm.vue'
 import ConfirmBox from '@/components/utils/ConfirmBox.vue'
 import { useRecurrentRoutineStore } from '@/stores/recurrentRoutineStore'
 import { useCurrentRoutineStore } from '@/stores/currentRoutineStore'
@@ -164,6 +164,10 @@ const createNewTitle = async (title: string) => {
   routineSelected.value.title = title
   createNewRoutine(routineSelected.value)
 }
+const updateTitle = async (title: string) => {
+  routineSelected.value.title = title
+  updateRoutine(routineSelected.value)
+}
 
 const createNewRoutine = async (routine: CurrentRoutine) => {
   routine.date = props.daySelected.date
@@ -208,7 +212,7 @@ const deleteRoutine = async (routineSelected: CurrentRoutine) => {
     currentRoutinesStore.removeRoutinesByIds([routineSelected.id])
     resetDateForm()
     notification.success({
-      content: 'Tâche supprimé avec succès !',
+      content: 'Tâche supprimée avec succès !',
       duration: 3000
     })
   } else {
@@ -353,13 +357,15 @@ const pourRecurrentRoutines = async () => {
 
     <!-- Form de création/update -->
     <Transition name="slide-fade">
-      <RoutineForm
+      <TitleForm
         v-if="showRoutineForm"
         v-model="showRoutineForm"
-        title="Mettre à jour une tâche"
-        :routineSelected="routineSelected"
+        formTitle="Mettre à jour une tâche"
+        :hasTags="true"
+        :itemId="routineSelected.id"
+        :itemTitle="routineSelected.title"
         @create="createNewTitle"
-        @update="updateRoutine"
+        @update="updateTitle"
       />
     </Transition>
 
